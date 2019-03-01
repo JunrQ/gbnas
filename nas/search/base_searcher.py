@@ -1,6 +1,8 @@
 
 import torch.optim as optim
+import logging
 
+from ..models.base_model import BaseModel
 
 class BaseSearcher(object):
   """Base class for searching network.
@@ -8,14 +10,16 @@ class BaseSearcher(object):
 
   def __init__(self, model,
                mod_opt_dict,
-               arch_opt_dict):
+               arch_opt_dict,
+               gpus,
+               logger=logging):
     """
     Parameters
     ----------
 
 
     """
-
+    assert isinstance(model, BaseModel)
     self.mod = model
 
     # Build optimizer
@@ -30,7 +34,6 @@ class BaseSearcher(object):
     arch_opt_dict['params'] = self.mod.arch_params
     self.a_opt = getattr(optim, opt_type)(**arch_opt_dict)
 
-  
   def _step_train(self, input, target):
     """Perform one step of $w$ training.
     """
@@ -39,8 +42,6 @@ class BaseSearcher(object):
     loss = self.mod.loss(output, target)
     loss.backward()
     self.w_opt.step()
-  
-
 
   def _step_search(self, input, target):
     """Perform one step of arch param training.
@@ -50,6 +51,3 @@ class BaseSearcher(object):
     loss = self.mod.loss(output, target)
     loss.backward()
     self.a_opt.step()
-
-
-  
