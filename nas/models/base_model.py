@@ -37,13 +37,36 @@ class BaseModel(nn.Module):
     for b in self.tbs_blocks:
       self.arch_params.append(b.arch_params)
       self.register_parameter(b.name, b.arch_params)
-  
 
-  def forward(self, x):
+  def forward(self, x, b_input=None, 
+              tbs_input=None, head_input=None):
+    """Forward
 
-    x = self.base(x)
-    x = self.tbs_blocks(x)
-    x = self.head(x)
+    Parameters
+    ----------
+    x : torch.tensor
+      input
+    b_input
+      base extra input
+    tbs_input
+      tbs part extra input
+    head_input
+      head extra input
+    """
+    if b_input is None:
+      x = self.base(x)
+    else:
+      x = self.base(x, b_input)
+    
+    if tbs_input is None:
+      x = self.tbs_blocks(x)
+    else:
+      x = self.tbs_blocks(x, tbs_input)
+    
+    if head_input is None:
+      x = self.head(x)
+    else:
+      x = self.head(x, head_input)
 
   def loss(self, output, target):
     return self.head.loss(output, target)

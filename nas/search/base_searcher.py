@@ -34,20 +34,50 @@ class BaseSearcher(object):
     arch_opt_dict['params'] = self.mod.arch_params
     self.a_opt = getattr(optim, opt_type)(**arch_opt_dict)
 
-  def _step_train(self, input, target):
+    # Log info
+    self.logger = logger
+
+  def _step_train(self, inputs, target):
     """Perform one step of $w$ training.
+
+    Parameters
+    ----------
+    inputs : list or tuple of four elemets
+      e.g. (x, None, None, None)
+    targets : 
+      calculating loss
     """
     self.w_opt.zero_grad()
-    output = self.mod(input)
+    output = self.mod(*input)
     loss = self.mod.loss(output, target)
     loss.backward()
     self.w_opt.step()
 
-  def _step_search(self, input, target):
+  def _step_search(self, inputs, target):
     """Perform one step of arch param training.
+
+    Parameters
+    ----------
+    inputs : list or tuple of four elemets
+      e.g. (x, None, None, None)
+    targets : 
+      calculating loss
     """
     self.a_opt.zero_grad()
-    output = self.mod(input)
+    output = self.mod(*input)
     loss = self.mod.loss(output, target)
     loss.backward()
     self.a_opt.step()
+
+  def save_arch_params(self, save_path):
+    """Save architecture params.
+    """
+    res = []
+    with open(save_path, 'w') as f:
+      for t in self.mod.arch_params:
+        t_list = list(t.detach().cpu().numpy())
+        res.append(t_list)
+        s = ' '.join([str(tmp) for tmp in t_list])
+        f.write(s + '\n')
+    return res
+
