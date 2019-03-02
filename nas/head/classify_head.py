@@ -17,14 +17,20 @@ class ClassificationHead(BaseHead):
     self.classifier = nn.Sequential(nn.BatchNorm1d(in_channels),
                                     nn.Linear(in_channels, feature_dim)
                                     nn.Linear(feature_dim, num_classes))
-    self._criterion = nn.CrossEntropyLoss().to(device)
+    self._ce = nn.CrossEntropyLoss().to(device)
   
   def forward(self, x):
+    self.batch_size = x.size()[0]
     x = self.global_pooling(x)
     x = self.classifier(x.view(x.size(0), -1))
+    self.logits = x
+    return x
   
   def loss(self, x, target):
-    return self._criterion(x, target)
+    self.ce_loss = self._ce(x, target)
+    self.acc = torch.sum(x == target).float() / self.batch_size
+    self.total_loss = self.ce_loss
+    return self.total_loss
 
 
 

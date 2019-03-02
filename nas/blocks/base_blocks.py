@@ -3,6 +3,7 @@ import numpy as np
 import torch.nn as nn
 
 from ..layers import BASICUNIT
+from utils import measure_speed
 
 class BaseBlock(nn.Module):
   """Base class for TBS(to be search) blocks.
@@ -78,6 +79,23 @@ class BaseBlock(nn.Module):
       t_blk = BASICUNIT[blk[0], **blk[1]]
       self.blocks.append(t_blk)
     self.blocks = nn.ModuleList(self.blocks)
+  
+  def speed_test(self, x, device='cuda', times=200,
+                 verbose=True):
+    """Speed test.
+    """
+    self.speed = []
+    msg = ''
+    for i, b in enumerate(self.blocks):
+      s = measure_speed(b, x, device, times)
+      msg += "%s %d block speed %.5f \n" % (self.name, i, s)
+      self.speed.append(s)
+    if verbose:
+      print(msg)
+    return msg
+
+  def speed_loss(self):
+    assert hasattr(self, 'speed'), 'Make sure you run speed_test before'
 
 
 

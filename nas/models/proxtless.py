@@ -1,6 +1,6 @@
 
 
-from base_model import BaseModel
+from classify_model import ClassificationModel
 
 
 from ..blocks.proxyless_blks import ProxylessBlock
@@ -8,12 +8,18 @@ from ..head.classify_head import ClassificationHead
 
 
 
-class ProxylessNAS(BaseModel):
+class ProxylessNAS(ClassificationModel):
   """ProxylessNAS
   [PROXYLESSNAS](https://arxiv.org/abs/1812.00332)
   """
 
   def __init__(self, num_classes):
+    """
+    Parameters
+    ----------
+    num_classes : int
+      number of classes for classification
+    """
     
 
     in_channels = 64
