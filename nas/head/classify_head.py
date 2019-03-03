@@ -1,6 +1,7 @@
+import torch
 import torch.nn as nn
 
-from base_head import BaseHead
+from .base_head import BaseHead
 
 class ClassificationHead(BaseHead):
   """Head for classification.
@@ -15,7 +16,7 @@ class ClassificationHead(BaseHead):
 
     self.global_pooling = nn.AdaptiveAvgPool2d(1)
     self.classifier = nn.Sequential(nn.BatchNorm1d(in_channels),
-                                    nn.Linear(in_channels, feature_dim)
+                                    nn.Linear(in_channels, feature_dim),
                                     nn.Linear(feature_dim, num_classes))
     self._ce = nn.CrossEntropyLoss().to(device)
   

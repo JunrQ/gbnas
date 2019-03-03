@@ -1,9 +1,10 @@
 
 import numpy as np
 import torch.nn as nn
+import torch
 
 from ..layers import BASICUNIT
-from utils import measure_speed
+from .utils import measure_speed
 
 class BaseBlock(nn.Module):
   """Base class for TBS(to be search) blocks.
@@ -76,7 +77,7 @@ class BaseBlock(nn.Module):
     """
     self.blocks = []
     for blk in config:
-      t_blk = BASICUNIT[blk[0], **blk[1]]
+      t_blk = BASICUNIT[blk[0]](**blk[1])
       self.blocks.append(t_blk)
     self.blocks = nn.ModuleList(self.blocks)
   
@@ -94,8 +95,19 @@ class BaseBlock(nn.Module):
       print(msg)
     return msg
 
-  def speed_loss(self):
+  def speed_loss(self, weight, batch_size):
+    """Override this method if you need a different
+    speed loss.
+    The default is weighted sum of all blocks.
+    """
     assert hasattr(self, 'speed'), 'Make sure you run speed_test before'
+    if isinstance(self.speed, list):
+      self.speed = torch.tensor(self.speed)
+    s = self.speed.repeat(batch_size, 1)
+    l = torch.sum(torch.mul(weight, s))
+    return l
+    
+
 
 
 

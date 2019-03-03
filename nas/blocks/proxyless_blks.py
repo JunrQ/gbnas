@@ -1,7 +1,7 @@
 
 import torch.nn as nn
 
-from sample_blks import SampleBlock
+from .sample_blks import SampleBlock
 
 class ProxylessBlock(SampleBlock):
   """ProxylessNAS
@@ -10,6 +10,12 @@ class ProxylessBlock(SampleBlock):
 
   def __init__(self, **kwargs):
     """
+    Parameters
+    ----------
+    in_channels : int
+    out_channels : int
+    name : str
+    device : str or torch.device
     """
     super(ProxylessBlock, self).__init__(**kwargs)
     self._default_cfg = None

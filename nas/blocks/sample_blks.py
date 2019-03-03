@@ -2,9 +2,10 @@
 
 import numpy as np
 import torch.nn as nn
+import torch
 
-from base_blocks import BaseBlock
-from utils import scalar2int
+from .base_blocks import BaseBlock
+from .utils import scalar2int
 
 class SampleBlock(BaseBlock):
   """Sample one or more blocks from
@@ -13,11 +14,10 @@ class SampleBlock(BaseBlock):
 
   def __init__(self,
                **kwargs):
-    
-    super(SampleBlocks, self).__init__(**kwargs)
+    super(SampleBlock, self).__init__(**kwargs)
   
   # Override
-  def prob(self, batch_size, temperature):
+  def prob(self, batch_size):
     """Calculate prob from architecture parameters.
     """
     t = self.arch_params.repeat(batch_size, 1)
@@ -28,8 +28,13 @@ class SampleBlock(BaseBlock):
     """
     TODO(ZhouJ) Only support sample one for now.
     """
-    m = torch.distributions.categorical.Categorical(self.prob())
+    batch_size = x.size()[0]
+    weight = self.prob(batch_size=batch_size)
+    m = torch.distributions.categorical.Categorical(weight)
     action = m.sample(1)
     choosen_idxs = scalar2int(action)
-    return self.blocks[choosen_idxs](x), m.log_prob(action)
+    output = self.blocks[choosen_idxs](x)
+    p = m.log_prob(action)
+
+    return output, p
 

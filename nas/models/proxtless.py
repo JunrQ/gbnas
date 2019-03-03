@@ -1,8 +1,7 @@
+import torch
+import torch.nn as nn
 
-
-from classify_model import ClassificationModel
-
-
+from .classify_model import ClassificationModel
 from ..blocks.proxyless_blks import ProxylessBlock
 from ..head.classify_head import ClassificationHead
 
@@ -20,8 +19,6 @@ class ProxylessNAS(ClassificationModel):
     num_classes : int
       number of classes for classification
     """
-    
-
     in_channels = 64
     base = nn.Conv2d(3, in_channels, 3, 1, padding=1)
     tbs_list = []
@@ -33,13 +30,16 @@ class ProxylessNAS(ClassificationModel):
 
       for j in range(l):
         out_channels = channels[i]
+
+        name = "layer_%d_blk_%d" % (i, j)
         tbs_list.append(ProxylessBlock(in_channels=in_channels,
                                       out_channels=out_channels,
-                                      stride=stride))
+                                      stride=stride,
+                                      name=name))
         in_channels = out_channels
         stride = 1
     
-    head = ClassificationHead(in_channels, 192)
+    head = ClassificationHead(in_channels, 192, num_classes=num_classes)
 
     super(ProxylessNAS, self).__init__(base=base,
                                        tbs_blocks=tbs_list,

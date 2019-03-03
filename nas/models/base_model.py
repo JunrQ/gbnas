@@ -70,6 +70,20 @@ class BaseModel(nn.Module):
 
   def loss(self, output, target):
     return self.head.loss(output, target)
+  
+  def speed_test(self, x, b_input=None, 
+                 tbs_input=None, head_input=None,
+                 device='cuda'):
+    """Measure speed for tbs blocks.
+    """
+    if b_input is None:
+      x = self.base(x)
+    else:
+      x = self.base(x, b_input)
+    
+    for blk in self.tbs_blocks:
+      x = blk.speed_test(x, device=device)
+
 
 
 
