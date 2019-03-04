@@ -32,10 +32,11 @@ class BaseModel(nn.Module):
     else:
       raise TypeError("tbs_blocks should be type list or nn.Module")
     self.head = head
-
     self.arch_params = []
+    self.model_params = []
     for b in self.tbs_blocks:
       self.arch_params.append(b.arch_params)
+      self.model_params += b.model_params
       # register is not necessary, all blk has registered
       # parameter through self.** = Parameter()
       # self.register_parameter(b.name, b.arch_params)
@@ -90,10 +91,13 @@ class BaseModel(nn.Module):
     for blk in self.tbs_blocks:
       x = blk.speed_test(x, device=device)
     
-  def loss_(self, x, y):
+  def loss_(self, x, y, mode=None):
     """Calculate loss and return it.
 
     Under most circumstance, you want to override this.
+
+    TODO(ZhouJ) Sometimes, model parameters and architecture
+    parameters use different losses.
     """
     raise NotImplementedError()
 

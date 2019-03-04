@@ -1,6 +1,8 @@
 import logging
+import time
 
-from base_searcher import BaseSearcher
+from .base_searcher import BaseSearcher
+from ..utils import AvgrageMeter
 
 class ClassificationSearcher(BaseSearcher):
   """Search class for classification.
@@ -8,11 +10,11 @@ class ClassificationSearcher(BaseSearcher):
 
   def __init__(self,
                model,
-               mod_opt_dict,
-               arch_opt_dict,
                gpus,
                train_w_ds,
                train_arch_ds,
+               mod_opt_dict,
+               arch_opt_dict,
                logger=logging,
                **kwargs):
     """
@@ -112,7 +114,7 @@ class ClassificationSearcher(BaseSearcher):
       self.logger.info("Start to train w for epoch %d" % (epoch+start_w_epoch))
       for step, (input, target) in enumerate(train_w_ds):
         self.step_w(input, target)
-        self.batch_end_callback(epoch, step
+        self.batch_end_callback(epoch, step)  
 
 
 

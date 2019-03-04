@@ -2,7 +2,6 @@
 
 from .base_model import BaseModel
 
-
 class ClassificationModel(BaseModel):
   """Base model for classification.
   """
@@ -27,7 +26,7 @@ class ClassificationModel(BaseModel):
     """
     return self.head.acc
 
-  def loss_(self, x, y):
+  def loss_(self, x, y, mode=None):
     """Calculate loss and return it.
 
     Under most circumstance, you want to override this.

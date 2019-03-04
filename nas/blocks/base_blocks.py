@@ -15,6 +15,7 @@ class BaseBlock(nn.Module):
   def __init__(self, in_channels,
                out_channels,
                name,
+               stride=1,
                devide='cuda',
                **kwargs):
     """
@@ -35,6 +36,7 @@ class BaseBlock(nn.Module):
     self.arch_param_name = name + '_arch_param'
     self.name = name
     self.devide = devide
+    self.stride = stride
   
   def init_arch_params(self, init_value=1.0):
     """Initilize architecture parameters and register
@@ -60,6 +62,7 @@ class BaseBlock(nn.Module):
   
   @property
   def model_params(self):
+    # TODO(ZhouJ) arch_params is type tensor, but model_params is list,
     if self._mod_params is None:
       self._mod_params = []
       for n, p in self.named_parameters():
@@ -82,20 +85,23 @@ class BaseBlock(nn.Module):
       t_blk = BASICUNIT[blk[0]](**blk[1])
       self.blocks.append(t_blk)
     self.blocks = nn.ModuleList(self.blocks)
+    self.num_block = len(self.blocks)
   
   def speed_test(self, x, device='cuda', times=200,
                  verbose=True):
     """Speed test.
+
+    TODO(ZhouJ) output is the last blk's output
     """
     self.speed = []
     msg = ''
     for i, b in enumerate(self.blocks):
-      s = measure_speed(b, x, device, times)
-      msg += "%s %d block speed %.5f \n" % (self.name, i, s)
+      s, o = measure_speed(b, x, device, times)
+      msg += "%s %d block speed %.5f ms\n" % (self.name, i, s)
       self.speed.append(s)
     if verbose:
       print(msg)
-    return msg
+    return o
 
   def speed_loss(self, weight, batch_size):
     """Override this method if you need a different

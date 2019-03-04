@@ -20,17 +20,16 @@ class ProxylessBlock(SampleBlock):
     super(ProxylessBlock, self).__init__(**kwargs)
     self._default_cfg = None
 
-    self.build_from_config(self.default_config)
+    self.build_from_config(self.default_config())
     self.init_arch_params()
-  
-  @property
+
   def default_config(self):
     if self._default_cfg is None:
       cfg = []
       for kernel_size in [3, 5, 7]:
         for expansion in [3, 6]:
           kwargs = {'in_channels' : self.in_channels,
-                    'out_channels:' : self.out_channels,
+                    'out_channels' : self.out_channels,
                     'kernel_size' : kernel_size,
                     'stride' : self.stride,
                     'expand_ratio' : expansion}

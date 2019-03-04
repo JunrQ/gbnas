@@ -29,4 +29,4 @@ def measure_speed(net,
   toc = time.time()
   speed = 1.0 * (toc - tic) / times
 
-  return speed
+  return speed, output

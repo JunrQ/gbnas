@@ -35,9 +35,9 @@ class BaseSearcher(object):
     self.mod = model.train()
 
     # Build optimizer
-    assert isinstance(mod_opt_dict, dict), 'Dict required' + \ 
+    assert isinstance(mod_opt_dict, dict), 'Dict required' + \
            ' for mod opt parameters'
-    assert isinstance(arch_opt_dict, dict), 'Dict required' + \ 
+    assert isinstance(arch_opt_dict, dict), 'Dict required' + \
            ' for arch opt parameters'
     opt_type = mod_opt_dict.pop('type')
     mod_opt_dict['params'] = self.mod.model_params
@@ -74,8 +74,12 @@ class BaseSearcher(object):
     targets : 
       calculating loss
     """
+    if self.cuda:
+      inputs = inputs.cuda()
+      target = target.cuda()
     self.w_opt.zero_grad()
-    loss = self._step_forward(inputs, target)
+    outputs = self._step_forward(inputs)
+    loss = self.mod.loss_(outputs, target, 'w')
     self.w_opt.step()
     if self.w_lr_scheduler:
       self.w_lr_scheduler.step()
@@ -90,22 +94,22 @@ class BaseSearcher(object):
     targets : 
       calculating loss
     """
+    if self.cuda:
+      inputs = inputs.cuda()
+      target = target.cuda()
     self.a_opt.zero_grad()
-    loss = self._step_forward(inputs, target)
+    outputs = self._step_forward(inputs)
+    loss = self.mod.loss_(outputs, target, 'a')
     self.a_opt.step()
     if self.arch_lr_scheduler:
       self.arch_lr_scheduler.step()
 
-  def _step_forward(self, inputs, target):
-    """Perform one step.
+  def _step_forward(self, inputs):
+    """Perform one forward step.
     """
-    if self.cuda:
-      inputs = inputs.cuda()
-      target = target.cuda()
     output = self.mod(*input)
     self.batch_size = self.mod.batch_size
-    loss = self.mod.loss_(output, target)
-    return loss
+    return output
 
   def save_arch_params(self, save_path):
     """Save architecture params.
