@@ -57,11 +57,14 @@ class BaseModel(nn.Module):
       head extra input
     """
     self.batch_size = x.size()[0]
+
+    # base forward
     if b_input is None:
       x = self.base(x)
     else:
       x = self.base(x, b_input)
-    
+
+    # tbs forward
     assert tbs_input is None, 'Not supported for now'
     for i, b in enumerate(self.tbs_blocks):
       if i == 0:
@@ -69,7 +72,8 @@ class BaseModel(nn.Module):
       else:
         x, b_l = b(x)
         self.blk_loss += b_l
-    
+
+    # head forward
     if head_input is None:
       x = self.head(x)
     else:
@@ -83,13 +87,18 @@ class BaseModel(nn.Module):
                  tbs_input=None, head_input=None,
                  device='cuda'):
     """Measure speed for tbs blocks.
+
+    TODO(ZhouJ) Don't know if it's right to avoid 
+      memory wast.
     """
+    self.base.eval()
     if b_input is None:
       x = self.base(x)
     else:
       x = self.base(x, b_input)
     
     for blk in self.tbs_blocks:
+      blk.eval()
       x = blk.speed_test(x, device=device)
     
   def loss_(self, x, y, mode=None):

@@ -3,6 +3,7 @@
 import numpy as np
 import torch.nn as nn
 import torch
+import pdb
 
 from .base_blocks import BaseBlock
 from .utils import scalar2int
@@ -40,10 +41,12 @@ class SampleBlock(BaseBlock):
     """
     batch_size = x.size()[0]
     weight = self.prob(batch_size=1)
+
     m = torch.distributions.categorical.Categorical(weight)
     action = m.sample()
     choosen_idxs = scalar2int(action)
-    output = self.blocks[choosen_idxs](x)
+
+    output = self.blocks[2](x)
     p = m.log_prob(action)
 
     # REINFORCE

@@ -20,8 +20,8 @@ class ProxylessNAS(ClassificationModel):
     in_channels = 64
     base = nn.Conv2d(3, in_channels, 3, 1, padding=1)
     tbs_list = []
-    layer = [3, 4, 6, 3]
-    channels = [112, 184, 352, 1024]
+    layer = [3, 3, 3]
+    channels = [112, 184, 352]
     out_channels = channels[0]
 
     layer_idx = 0
@@ -64,10 +64,9 @@ class ProxylessNAS(ClassificationModel):
       mode = 'w'
     head_loss = super(ClassificationModel, self).head_loss_(x, y)
     if mode == 'w':
-      self.loss = head_loss
+      self.loss = head_loss + 0 * self.blk_loss
     elif mode == 'a':
-      blk_loss = self.blk_loss
-      self.loss = head_loss + 0.1 * blk_loss
+      self.loss = head_loss + 0.1 * blkself.blk_loss_loss
     else:
       raise ValueError("Not supported mode: %s provided" % mode)
     return self.loss

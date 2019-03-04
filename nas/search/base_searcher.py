@@ -83,6 +83,7 @@ class BaseSearcher(object):
     self.w_opt.zero_grad()
     outputs = self._step_forward(inputs)
     loss = self.mod.loss_(outputs, target, 'w')
+    loss.backward()
     self.w_opt.step()
     if self.w_lr_scheduler:
       self.w_lr_scheduler.step()
@@ -103,6 +104,7 @@ class BaseSearcher(object):
     self.a_opt.zero_grad()
     outputs = self._step_forward(inputs)
     loss = self.mod.loss_(outputs, target, 'a')
+    loss.backward()
     self.a_opt.step()
     if self.arch_lr_scheduler:
       self.arch_lr_scheduler.step()
