@@ -20,21 +20,32 @@ class SampleBlock(BaseBlock):
   def prob(self, batch_size):
     """Calculate prob from architecture parameters.
     """
-    t = self.arch_params.repeat(batch_size, 1)
+    if batch_size > 1:
+      t = self.arch_params.repeat(batch_size, 1)
     weight = nn.functional.softmax(t)
     return weight
-
+  
+  def speed_loss(self, idx):
+    """Override weighted sum.
+    This loss need not to be differential because
+    of REINFORCE.
+    """
+    return self.speed[idx]
+  
   def forward(self, x):
     """
     TODO(ZhouJ) Only support sample one for now.
     """
     batch_size = x.size()[0]
-    weight = self.prob(batch_size=batch_size)
+    weight = self.prob(batch_size=1)
     m = torch.distributions.categorical.Categorical(weight)
-    action = m.sample(1)
-    choosen_idxs = scalar2int(action)
+    action = m.sample()
+    choosen_idxs = tensor2list(action)
     output = self.blocks[choosen_idxs](x)
     p = m.log_prob(action)
 
-    return output, p
+    # REINFORCE
+    # reward is minus loss
+    rf_loss = p * self.speed_loss(choosen_idxs)
+    return output, rf_loss
 

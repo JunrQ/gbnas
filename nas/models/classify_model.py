@@ -3,8 +3,6 @@
 from .base_model import BaseModel
 
 
-
-
 class ClassificationModel(BaseModel):
   """Base model for classification.
   """
@@ -31,7 +29,11 @@ class ClassificationModel(BaseModel):
 
   def loss_(self, x, y):
     """Calculate loss and return it.
+
+    Under most circumstance, you want to override this.
     """
-    self.loss = super(ClassificationModel, self).loss_(x, y)
+    head_loss = super(ClassificationModel, self).head_loss_(x, y)
+    # blk_loss = self.blk_loss
+    return self.head_loss
 
 

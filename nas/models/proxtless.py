@@ -5,8 +5,6 @@ from .classify_model import ClassificationModel
 from ..blocks.proxyless_blks import ProxylessBlock
 from ..head.classify_head import ClassificationHead
 
-
-
 class ProxylessNAS(ClassificationModel):
   """ProxylessNAS
   [PROXYLESSNAS](https://arxiv.org/abs/1812.00332)
@@ -44,6 +42,13 @@ class ProxylessNAS(ClassificationModel):
     super(ProxylessNAS, self).__init__(base=base,
                                        tbs_blocks=tbs_list,
                                        head=head)
+  
+
+  def loss_(self, x, y):
+    head_loss = super(ClassificationModel, self).head_loss_(x, y)
+    blk_loss = self.blk_loss
+
+    return head_loss + 0.1 * blk_loss
     
 
 

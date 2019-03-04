@@ -8,6 +8,8 @@ from .utils import measure_speed
 
 class BaseBlock(nn.Module):
   """Base class for TBS(to be search) blocks.
+
+  **Note:** forward should return (output, extra_loss)
   """
 
   def __init__(self, in_channels,

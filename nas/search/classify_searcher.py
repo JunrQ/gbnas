@@ -35,10 +35,7 @@ class ClassificationSearcher(BaseSearcher):
       default is CosineDecayLR
     arch_lr_scheduler : 
       default is None
-
-
     """
-
     super(ClassificationSearcher, self).__init__(
       model=model, mod_opt_dict=mod_opt_dict,
       arch_opt_dict=arch_opt_dict, gpus=gpus, 
@@ -53,10 +50,9 @@ class ClassificationSearcher(BaseSearcher):
     # ds
     self.w_ds = train_w_ds
     self.arch_ds = train_arch_ds
-  
 
   def log_info(self, epoch, batch, speed=None):
-    msg = "Epoch[%d] Batch[%d]" % (epoch, step)
+    msg = "Epoch[%d] Batch[%d]" % (epoch, batch)
     if speed is not None:
       msg += ' Speed: %.6f samples/sec' % speed
     for a in self.avgs:
@@ -66,7 +62,6 @@ class ClassificationSearcher(BaseSearcher):
     return msg
   
   def batch_end_callback(self, epoch, batch):
-
     for avg in self.avgs:
       n = avg.name
       value = getattr(self.mod, n)
@@ -77,8 +72,6 @@ class ClassificationSearcher(BaseSearcher):
       speed = 1.0 * (self.batch_size * self.log_frequence) / (self.toc - self.tic)
       self.log_info(epoch, batch, speed=speed)
       self.tic = time.time()
-
-
 
   def search(self, **kwargs):
     """Override this method if you need a different
@@ -123,15 +116,3 @@ class ClassificationSearcher(BaseSearcher):
 
 
 
-
-
-
-
-
-  
-    
-
-
-
-
-  
