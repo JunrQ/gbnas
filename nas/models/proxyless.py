@@ -64,9 +64,10 @@ class ProxylessNAS(ClassificationModel):
       mode = 'w'
     head_loss = super(ClassificationModel, self).head_loss_(x, y)
     if mode == 'w':
-      return head_loss
+      self.loss = head_loss
     elif mode == 'a':
       blk_loss = self.blk_loss
-      return head_loss + 0.1 * blk_loss
+      self.loss = head_loss + 0.1 * blk_loss
     else:
       raise ValueError("Not supported mode: %s provided" % mode)
+    return self.loss

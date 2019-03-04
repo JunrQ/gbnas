@@ -16,7 +16,9 @@ class BaseSearcher(object):
                gpus,
                logger=logging,
                w_lr_scheduler=CosineDecayLR,
-               arch_lr_scheduler=None):
+               w_sche_cfg={'T_max':400},
+               arch_lr_scheduler=None,
+               arch_sche_cfg=None):
     """
     Parameters
     ----------
@@ -45,9 +47,10 @@ class BaseSearcher(object):
     opt_type = arch_opt_dict.pop('type')
     arch_opt_dict['params'] = self.mod.arch_params
     self.a_opt = getattr(optim, opt_type)(**arch_opt_dict)
-    self.w_lr_scheduler =  None if w_lr_scheduler is None else w_lr_scheduler
+    self.w_lr_scheduler =  None if w_lr_scheduler is None \
+                           else w_lr_scheduler(self.w_opt, **w_sche_cfg)
     self.arch_lr_scheduler =  None if arch_lr_scheduler is None \
-                                   else arch_lr_scheduler
+                              else arch_lr_scheduler(self.a_opt, **arch_sche_cfg)
     
     self.gpus = gpus
     self.cuda = (len(gpus) > 0)
@@ -107,7 +110,7 @@ class BaseSearcher(object):
   def _step_forward(self, inputs):
     """Perform one forward step.
     """
-    output = self.mod(*input)
+    output = self.mod(inputs)
     self.batch_size = self.mod.batch_size
     return output
 

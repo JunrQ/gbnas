@@ -24,6 +24,15 @@ class Config(object):
   start_w_epoch = 2
   train_portion = 0.8
 
+lr_scheduler_params = {
+  'logger' : _logger,
+  'T_max' : 400,
+  'alpha' : 1e-4,
+  'warmup_step' : 100,
+  't_mul' : 1.5,
+  'lr_mul' : 0.95,
+}
+
 config = Config()
 
 parser = argparse.ArgumentParser(description="Train a model with data parallel for base net \
@@ -67,7 +76,8 @@ searcher = ClassificationSearcher(
               logger=_logger,
               gpus=[int(x) for x in args.gpus.split(',')],
               train_w_ds=train_ds,
-              train_arch_ds=val_ds)
+              train_arch_ds=val_ds,
+              w_sche_cfg=lr_scheduler_params)
 
 searcher.search(epoch=args.epochs,
                 start_w_epoch=5,

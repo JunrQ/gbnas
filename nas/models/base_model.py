@@ -65,15 +65,16 @@ class BaseModel(nn.Module):
     assert tbs_input is None, 'Not supported for now'
     for i, b in enumerate(self.tbs_blocks):
       if i == 0:
-        x, self.blk_loss = self.tbs_blocks(x)
+        x, self.blk_loss = b(x)
       else:
-        x, b_l = self.tbs_blocks(x)
+        x, b_l = b(x)
         self.blk_loss += b_l
     
     if head_input is None:
       x = self.head(x)
     else:
       x = self.head(x, head_input)
+    return x
 
   def head_loss_(self, output, target):
     return self.head.loss_(output, target)

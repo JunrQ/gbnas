@@ -33,10 +33,14 @@ class ClassificationSearcher(BaseSearcher):
     train_arch_ds : dataset
       dataset for traing architecture parameters
     logger : logger
-    w_lr_scheduler : 
+    w_lr_scheduler : `subclass` of _LRScheduler
       default is CosineDecayLR
+    w_sche_cfg : dict
+      parameters for w_lr_scheduler
     arch_lr_scheduler : 
       default is None
+    arch_sche_cfg : dict
+      parameters for arch_lr_scheduler
     """
     super(ClassificationSearcher, self).__init__(
       model=model, mod_opt_dict=mod_opt_dict,
@@ -115,6 +119,4 @@ class ClassificationSearcher(BaseSearcher):
       for step, (input, target) in enumerate(train_w_ds):
         self.step_w(input, target)
         self.batch_end_callback(epoch, step)  
-
-
 

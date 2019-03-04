@@ -33,6 +33,5 @@ class ClassificationModel(BaseModel):
     """
     head_loss = super(ClassificationModel, self).head_loss_(x, y)
     # blk_loss = self.blk_loss
-    return self.head_loss
-
-
+    self.loss = head_loss
+    return self.loss

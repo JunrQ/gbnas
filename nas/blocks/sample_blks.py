@@ -22,6 +22,8 @@ class SampleBlock(BaseBlock):
     """
     if batch_size > 1:
       t = self.arch_params.repeat(batch_size, 1)
+    else:
+      t = self.arch_params
     weight = nn.functional.softmax(t)
     return weight
   
@@ -40,7 +42,7 @@ class SampleBlock(BaseBlock):
     weight = self.prob(batch_size=1)
     m = torch.distributions.categorical.Categorical(weight)
     action = m.sample()
-    choosen_idxs = tensor2list(action)
+    choosen_idxs = scalar2int(action)
     output = self.blocks[choosen_idxs](x)
     p = m.log_prob(action)
 
