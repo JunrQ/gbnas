@@ -32,6 +32,5 @@ class ClassificationModel(BaseModel):
     Under most circumstance, you want to override this.
     """
     head_loss = super(ClassificationModel, self).head_loss_(x, y)
-    # blk_loss = self.blk_loss
-    self.loss = head_loss
-    return self.loss
+    self.loss = head_loss + 0.1 * self.blk_loss
+    return (self.loss, head_loss)

@@ -3,6 +3,7 @@ import time
 
 from .base_searcher import BaseSearcher
 from ..utils import AvgrageMeter
+from .utils import acc_func
 
 class ClassificationSearcher(BaseSearcher):
   """Search class for classification.
@@ -49,9 +50,16 @@ class ClassificationSearcher(BaseSearcher):
     
     # Info
     self._acc_avg = AvgrageMeter('acc')
+    self._acc_avg.register_func(lambda obj : 
+            acc_func(getattr(obj, 'cur_batch_output'), 
+                     getattr(obj, 'cur_batch_target'),
+                     getattr(obj, 'batch_size')))
     self._ce_avg = AvgrageMeter('ce')
+    self._ce_avg.register_func(lambda obj:
+            getattr(obj, 'cur_batch_ce'))
+
     self._loss_avg = AvgrageMeter('loss')
-    self.avgs = [self._loss_avg, self._acc_avg, self._ce_avg]
+    self.avgs = [self._acc_avg, self._ce_avg]
 
     # ds
     self.w_ds = train_w_ds
@@ -61,6 +69,8 @@ class ClassificationSearcher(BaseSearcher):
     msg = "Epoch[%d] Batch[%d]" % (epoch, batch)
     if speed is not None:
       msg += ' Speed: %.6f samples/sec' % speed
+    msg += ' %s' % self._loss_avg
+    self._loss_avg.reset()
     for a in self.avgs:
       msg += " %s" % a
     self.logger.info(msg)
@@ -69,9 +79,9 @@ class ClassificationSearcher(BaseSearcher):
   
   def batch_end_callback(self, epoch, batch):
     for avg in self.avgs:
-      n = avg.name
-      value = getattr(self.mod, n)
+      value = avg.cal(self)
       avg.update(value)
+    self._loss_avg.update(self.cur_batch_loss)
     
     if (batch > 0) and (batch % self.log_frequence == 0):
       self.toc = time.time()

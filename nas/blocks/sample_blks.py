@@ -46,7 +46,7 @@ class SampleBlock(BaseBlock):
     action = m.sample()
     choosen_idxs = scalar2int(action)
 
-    output = self.blocks[2](x)
+    output = self.blocks[choosen_idxs](x)
     p = m.log_prob(action)
 
     # REINFORCE

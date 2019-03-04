@@ -43,7 +43,6 @@ class ProxylessNAS(ClassificationModel):
     super(ProxylessNAS, self).__init__(base=base,
                                        tbs_blocks=tbs_list,
                                        head=head)
-  
 
   def loss_(self, x, y, mode='w'):
     """
@@ -57,6 +56,11 @@ class ProxylessNAS(ClassificationModel):
       'w' for training model parameters
       'a' for training architecture parameters
       default is 'w'
+    
+    Returns
+    -------
+    total_loss
+    ce
 
     TODO(ZhouJ) Loss in original paper
     """
@@ -64,9 +68,9 @@ class ProxylessNAS(ClassificationModel):
       mode = 'w'
     head_loss = super(ClassificationModel, self).head_loss_(x, y)
     if mode == 'w':
-      self.loss = head_loss + 0 * self.blk_loss
+      self.loss = head_loss
     elif mode == 'a':
-      self.loss = head_loss + 0.1 * blkself.blk_loss_loss
+      self.loss = head_loss + 0.1 * self.blk_loss
     else:
       raise ValueError("Not supported mode: %s provided" % mode)
-    return self.loss
+    return (self.loss, head_loss)

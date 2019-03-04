@@ -41,15 +41,16 @@ class BaseModel(nn.Module):
       # parameter through self.** = Parameter()
       # self.register_parameter(b.name, b.arch_params)
 
-  def forward(self, x, b_input=None, 
-              tbs_input=None, head_input=None):
+  def forward(self, x, y, base_input=None, 
+              tbs_input=None, head_input=None,
+              mode='w'):
     """Forward
 
     Parameters
     ----------
     x : torch.tensor
       input
-    b_input
+    base_input
       base extra input
     tbs_input
       tbs part extra input
@@ -59,10 +60,10 @@ class BaseModel(nn.Module):
     self.batch_size = x.size()[0]
 
     # base forward
-    if b_input is None:
+    if base_input is None:
       x = self.base(x)
     else:
-      x = self.base(x, b_input)
+      x = self.base(x, base_input)
 
     # tbs forward
     assert tbs_input is None, 'Not supported for now'
@@ -78,12 +79,13 @@ class BaseModel(nn.Module):
       x = self.head(x)
     else:
       x = self.head(x, head_input)
-    return x
+    l = self.loss_(x, y)
+    return x, l
 
   def head_loss_(self, output, target):
     return self.head.loss_(output, target)
   
-  def speed_test(self, x, b_input=None, 
+  def speed_test(self, x, base_input=None, 
                  tbs_input=None, head_input=None,
                  device='cuda'):
     """Measure speed for tbs blocks.
@@ -92,10 +94,10 @@ class BaseModel(nn.Module):
       memory wast.
     """
     self.base.eval()
-    if b_input is None:
+    if base_input is None:
       x = self.base(x)
     else:
-      x = self.base(x, b_input)
+      x = self.base(x, base_input)
     
     for blk in self.tbs_blocks:
       blk.eval()

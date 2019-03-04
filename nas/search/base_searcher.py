@@ -81,8 +81,7 @@ class BaseSearcher(object):
       inputs = inputs.cuda()
       target = target.cuda()
     self.w_opt.zero_grad()
-    outputs = self._step_forward(inputs)
-    loss = self.mod.loss_(outputs, target, 'w')
+    _, loss = self._step_forward(inputs, y=target, mode='w')
     loss.backward()
     self.w_opt.step()
     if self.w_lr_scheduler:
@@ -102,19 +101,25 @@ class BaseSearcher(object):
       inputs = inputs.cuda()
       target = target.cuda()
     self.a_opt.zero_grad()
-    outputs = self._step_forward(inputs)
-    loss = self.mod.loss_(outputs, target, 'a')
+    _, loss = self._step_forward(inputs, y=target, mode='a')
     loss.backward()
     self.a_opt.step()
     if self.arch_lr_scheduler:
       self.arch_lr_scheduler.step()
 
-  def _step_forward(self, inputs):
+  def _step_forward(self, inputs, y, mode='w'):
     """Perform one forward step.
     """
-    output = self.mod(inputs)
-    self.batch_size = self.mod.batch_size
-    return output
+    self.cur_batch_target = y
+    self.cur_batch_output, loss = self.mod(x=inputs, y=y, mode=mode)
+    self.batch_size = inputs.size()[0]
+    if isinstance(loss, (list, tuple)):
+      self.cur_batch_loss = loss[0]
+      self.cur_batch_ce = loss[1]
+    if len(self.gpus) > 1:
+      self.cur_batch_loss = self.cur_batch_loss.mean()
+      self.cur_batch_ce = self.cur_batch_ce.mean()
+    return self.cur_batch_output, self.cur_batch_loss
 
   def save_arch_params(self, save_path):
     """Save architecture params.

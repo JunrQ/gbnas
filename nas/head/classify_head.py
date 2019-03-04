@@ -29,15 +29,4 @@ class ClassificationHead(BaseHead):
   
   def loss_(self, x, target):
     self.ce_loss = self._ce(x, target)
-    pred = torch.argmax(x, dim=1)
-    self.acc = torch.sum(pred == target).float() / self.batch_size
-    self.total_loss = self.ce_loss
-    return self.total_loss
-
-
-
-
-
-
-
-
+    return self.ce_loss
