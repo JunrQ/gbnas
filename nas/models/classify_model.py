@@ -17,21 +17,21 @@ class ClassificationModel(BaseModel):
     super(ClassificationModel, self).__init__(base=base,
           tbs_blocks=tbs_blocks, head=head)
 
-
+  @property
   def ce(self):
     """Get cross entropy.
     """
     return self.head.ce_loss
   
-
+  @property
   def acc(self):
     """Get accuracy.
     """
     return self.head.acc
 
-  def loss(self, x, y):
+  def loss_(self, x, y):
     """Calculate loss and return it.
     """
-    self.total_loss = super(ClassificationModel, self).loss(x, y)
+    self.loss = super(ClassificationModel, self).loss_(x, y)
 
 

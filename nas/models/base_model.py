@@ -53,6 +53,7 @@ class BaseModel(nn.Module):
     head_input
       head extra input
     """
+    self.batch_size = x.size()[0]
     if b_input is None:
       x = self.base(x)
     else:
@@ -68,8 +69,8 @@ class BaseModel(nn.Module):
     else:
       x = self.head(x, head_input)
 
-  def loss(self, output, target):
-    return self.head.loss(output, target)
+  def loss_(self, output, target):
+    return self.head.loss_(output, target)
   
   def speed_test(self, x, b_input=None, 
                  tbs_input=None, head_input=None,

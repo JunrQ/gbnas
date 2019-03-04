@@ -1,5 +1,6 @@
-
+import torch
 import torch.optim as optim
+from torch.nn.parallel import DataParallel
 import logging
 
 from ..models.base_model import BaseModel
@@ -31,7 +32,7 @@ class BaseSearcher(object):
 
     """
     assert isinstance(model, BaseModel)
-    self.mod = model
+    self.mod = model.train()
 
     # Build optimizer
     assert isinstance(mod_opt_dict, dict), 'Dict required' + \ 
@@ -45,23 +46,25 @@ class BaseSearcher(object):
     arch_opt_dict['params'] = self.mod.arch_params
     self.a_opt = getattr(optim, opt_type)(**arch_opt_dict)
     self.w_lr_scheduler =  None if w_lr_scheduler is None else w_lr_scheduler
-    self.arch_lr_scheduler =  None if arch_lr_scheduler is \
+    self.arch_lr_scheduler =  None if arch_lr_scheduler is None \
                                    else arch_lr_scheduler
-
-
     
-
-
+    self.gpus = gpus
+    self.cuda = (len(gpus) > 0)
+    if self.cuda:
+      self.mod = self.mod.cuda()
+    if len(gpus) > 1:
+      self.mod = DataParallel(self.mod, gpus)
 
     # Log info
     self.logger = logger
   
-  def search(self):
+  def search(self, **kwargs):
     """Search architecture.
     """
     raise NotImplementedError()
 
-  def step_train(self, inputs, target):
+  def step_w(self, inputs, target):
     """Perform one step of $w$ training.
 
     Parameters
@@ -72,12 +75,12 @@ class BaseSearcher(object):
       calculating loss
     """
     self.w_opt.zero_grad()
-    self._step(inputs, target)
+    loss = self._step_forward(inputs, target)
     self.w_opt.step()
     if self.w_lr_scheduler:
       self.w_lr_scheduler.step()
 
-  def step_search(self, inputs, target):
+  def step_arch(self, inputs, target):
     """Perform one step of arch param training.
 
     Parameters
@@ -88,17 +91,21 @@ class BaseSearcher(object):
       calculating loss
     """
     self.a_opt.zero_grad()
-    self._step(inputs, target)
+    loss = self._step_forward(inputs, target)
     self.a_opt.step()
     if self.arch_lr_scheduler:
       self.arch_lr_scheduler.step()
 
-  def _step(self, inputs, target):
+  def _step_forward(self, inputs, target):
     """Perform one step.
     """
+    if self.cuda:
+      inputs = inputs.cuda()
+      target = target.cuda()
     output = self.mod(*input)
-    loss = self.mod.loss(output, target)
-    loss.backward()
+    self.batch_size = self.mod.batch_size
+    loss = self.mod.loss_(output, target)
+    return loss
 
   def save_arch_params(self, save_path):
     """Save architecture params.
@@ -111,4 +118,26 @@ class BaseSearcher(object):
         s = ' '.join([str(tmp) for tmp in t_list])
         f.write(s + '\n')
     return res
+  
+  def batch_end_callback(self, epoch, batch, log=False):
+    """Callback.
+
+    Parameters
+    ----------
+    batches : int
+      current batches
+    log : bool
+      whether do logging
+    """
+    raise NotImplementedError()
+  
+  def log_info(self):
+    raise NotImplementedError()
+  
+  def add_avg(self, avg):
+    """Add an avg object.
+    """
+    self.avgs.append(avg)
+
+
 

@@ -27,7 +27,7 @@ class ClassificationHead(BaseHead):
     self.logits = x
     return x
   
-  def loss(self, x, target):
+  def loss_(self, x, target):
     self.ce_loss = self._ce(x, target)
     self.acc = torch.sum(x == target).float() / self.batch_size
     self.total_loss = self.ce_loss
