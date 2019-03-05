@@ -98,6 +98,14 @@ class AvgrageMeter(object):
   
   def __repr__(self):
     return self.__str__()
+  
+  def register_func(self, f):
+    self._func = f
+  
+  def cal(self, *args, **kwargs):
+    if not hasattr(self, '_func'):
+      raise ValueError("Call register_func before this function")
+    return self._func(*args, **kwargs)
 
 def get_ip():
   try:

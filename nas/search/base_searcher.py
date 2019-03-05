@@ -35,6 +35,7 @@ class BaseSearcher(object):
     """
     assert isinstance(model, BaseModel)
     self.mod = model.train()
+    self.arch_params = self.mod.arch_params
 
     # Build optimizer
     assert isinstance(mod_opt_dict, dict), 'Dict required' + \
@@ -77,6 +78,7 @@ class BaseSearcher(object):
     targets : 
       calculating loss
     """
+    self.mode = 'w'
     if self.cuda:
       inputs = inputs.cuda()
       target = target.cuda()
@@ -97,6 +99,7 @@ class BaseSearcher(object):
     targets : 
       calculating loss
     """
+    self.mode = 'a'
     if self.cuda:
       inputs = inputs.cuda()
       target = target.cuda()
@@ -126,7 +129,7 @@ class BaseSearcher(object):
     """
     res = []
     with open(save_path, 'w') as f:
-      for t in self.mod.arch_params:
+      for t in self.arch_params:
         t_list = list(t.detach().cpu().numpy())
         res.append(t_list)
         s = ' '.join([str(tmp) for tmp in t_list])

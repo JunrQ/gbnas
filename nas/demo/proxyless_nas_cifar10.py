@@ -80,5 +80,5 @@ searcher = ClassificationSearcher(
               w_sche_cfg=lr_scheduler_params)
 
 searcher.search(epoch=args.epochs,
-                start_w_epoch=5,
+                start_w_epoch=2,
                 log_frequence=10)
