@@ -47,10 +47,13 @@ class BaseBlock(nn.Module):
                          requires_grad=True)
     nn.init.constant_(self._arch_params, init_value)
   
-  def prob(self, batch_size, temperature):
+  def prob(self, batch_size, temperature=1.0):
     """Calculate prob from architecture parameters.
     """
-    t = self.arch_params.repeat(batch_size, 1)
+    if batch_size > 1:
+      t = self.arch_params.repeat(batch_size, 1)
+    else:
+      t = self.arch_params
     weight = nn.functional.gumbel_softmax(t,
                                 temperature)
     return weight
@@ -109,7 +112,7 @@ class BaseBlock(nn.Module):
     """
     assert hasattr(self, 'speed'), 'Make sure you run speed_test before'
     if isinstance(self.speed, list):
-      self.speed = torch.tensor(self.speed).to(self.device)
+      self.speed = torch.tensor(self.speed).to(weight.device)
     if batch_size > 1:
       s = self.speed.repeat(batch_size, 1)
     else:

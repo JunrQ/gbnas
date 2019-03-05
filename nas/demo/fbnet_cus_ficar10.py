@@ -3,12 +3,15 @@ import time
 import os
 import torch
 
-from ..models.proxyless import ProxylessNAS
+from ..models.fbnet import FBNetCustom, FBNet
 from ..search.classify_searcher import ClassificationSearcher
 from ..datasets.cifar10 import get_cifar10_v1
 from ..utils import _set_file, _logger
 
 class Config(object):
+  alpha = 0.2
+  beta = 0.6
+  speed_f = './speed_cpu.txt'
   w_lr = 0.1
   w_mom = 0.9
   w_wd = 1e-4
@@ -53,10 +56,11 @@ _set_file(args.model_save_path + 'log.log')
 
 train_ds, val_ds = get_cifar10_v1(train_portion=config.train_portion,
                                   batch_size=args.batch_size)
-model = ProxylessNAS(10)
+model = FBNetCustom(10, alpha=config.alpha, beta=config.beta)
 
 # TODO(ZhouJ) put this into model or searcher
-model.speed_test(torch.randn((1, 3, 32, 32)))
+model.speed_test(torch.randn((1, 3, 32, 32)), verbose=False,
+                 device='cuda:' + args.gpus[0])
 
 searcher = ClassificationSearcher(
               model=model,

@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 
+from collections import OrderedDict
+
 from . import BASICUNIT
 
 __all__ = ['ChannelShuffle', 'Identity', 'ResNetBasicBlock',

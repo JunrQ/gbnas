@@ -34,6 +34,8 @@ class SampleBlock(BaseBlock):
     """Override weighted sum.
     This loss need not to be differential because
     of REINFORCE.
+
+    TODO(ZhouJ) Add a baseline to reduce var.
     """
     l = self.speed[idx] #  - self.reward_baseline
     # self.state_count += 1
@@ -60,5 +62,6 @@ class SampleBlock(BaseBlock):
 
     # REINFORCE
     # reward is minus loss
+    # TODO(ZhouJ) This gradient is very small 1e-9
     rf_loss = p * self.speed_loss(choosen_idxs)
     return output, rf_loss

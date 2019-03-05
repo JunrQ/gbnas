@@ -8,8 +8,13 @@ from ..head.classify_head import ClassificationHead
 class ProxylessNAS(ClassificationModel):
   """ProxylessNAS
   [PROXYLESSNAS](https://arxiv.org/abs/1812.00332)
-  """
 
+  NOTE 
+   - has 3 stride = 2
+   - default feature dim is 192
+   - only 9 layers
+   - only test on cifar10
+  """
   def __init__(self, num_classes):
     """
     Parameters
@@ -62,7 +67,7 @@ class ProxylessNAS(ClassificationModel):
     total_loss
     ce
 
-    TODO(ZhouJ) Loss in original paper
+    TODO(ZhouJ) Loss in original paper??
     """
     if mode is None:
       mode = 'w'

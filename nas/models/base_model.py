@@ -87,7 +87,7 @@ class BaseModel(nn.Module):
   
   def speed_test(self, x, base_input=None, 
                  tbs_input=None, head_input=None,
-                 device='cuda'):
+                 device='cuda', verbose=True):
     """Measure speed for tbs blocks.
 
     TODO(ZhouJ) Don't know if it's right to avoid 
@@ -101,7 +101,7 @@ class BaseModel(nn.Module):
     
     for blk in self.tbs_blocks:
       blk.eval()
-      x = blk.speed_test(x, device=device)
+      x = blk.speed_test(x, device=device, verbose=verbose)
     
   def loss_(self, x, y, mode=None):
     """Calculate loss and return it.

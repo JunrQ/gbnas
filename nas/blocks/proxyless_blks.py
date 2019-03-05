@@ -35,6 +35,4 @@ class ProxylessBlock(SampleBlock):
                     'expand_ratio' : expansion}
           cfg.append(['MBInvertedConvLayer', kwargs])
       self._default_cfg = cfg
-    return self._default_cfg 
-
-
+    return self._default_cfg

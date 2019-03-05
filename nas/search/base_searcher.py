@@ -56,9 +56,10 @@ class BaseSearcher(object):
     self.gpus = gpus
     self.cuda = (len(gpus) > 0)
     if self.cuda:
-      self.mod = self.mod.cuda()
-    if len(gpus) > 1:
-      self.mod = DataParallel(self.mod, gpus)
+      if len(gpus) > 1:
+        self.mod = DataParallel(self.mod, gpus)
+      else:
+        self.mod = self.mod.cuda(device=self.gpus[0])
 
     # Log info
     self.logger = logger
@@ -80,8 +81,8 @@ class BaseSearcher(object):
     """
     self.mode = 'w'
     if self.cuda:
-      inputs = inputs.cuda()
-      target = target.cuda()
+      inputs = inputs.cuda(device=self.gpus[0])
+      target = target.cuda(device=self.gpus[0])
     self.w_opt.zero_grad()
     _, loss = self._step_forward(inputs, y=target, mode='w')
     loss.backward()
@@ -101,8 +102,8 @@ class BaseSearcher(object):
     """
     self.mode = 'a'
     if self.cuda:
-      inputs = inputs.cuda()
-      target = target.cuda()
+      inputs = inputs.cuda(device=self.gpus[0])
+      target = target.cuda(device=self.gpus[0])
     self.a_opt.zero_grad()
     _, loss = self._step_forward(inputs, y=target, mode='a')
     loss.backward()
@@ -155,6 +156,3 @@ class BaseSearcher(object):
     """Add an avg object.
     """
     self.avgs.append(avg)
-
-
-
