@@ -5,7 +5,7 @@ from .base_searcher import BaseSearcher
 from ..utils import AvgrageMeter
 from .utils import acc_func
 
-class ClassificationSearcher(BaseSearcher):
+class DetectionSearcher(BaseSearcher):
   """Search class for classification.
   """
 
@@ -43,58 +43,55 @@ class ClassificationSearcher(BaseSearcher):
     arch_sche_cfg : dict
       parameters for arch_lr_scheduler
     """
-    super(ClassificationSearcher, self).__init__(
+    super(DetectionSearcher, self).__init__(
       model=model, mod_opt_dict=mod_opt_dict,
       arch_opt_dict=arch_opt_dict, gpus=gpus, 
       logger=logger, **kwargs)
     
     # Info
-    self._acc_avg = AvgrageMeter('acc')
-    self._acc_avg.register_func(lambda obj : 
-            acc_func(getattr(obj, 'cur_batch_output'), 
-                     getattr(obj, 'cur_batch_target'),
-                     getattr(obj, 'batch_size')))
-    self._ce_avg = AvgrageMeter('ce')
-    self._ce_avg.register_func(lambda obj:
-            getattr(obj, 'cur_batch_ce'))
-
     self._loss_avg = AvgrageMeter('loss')
-    self.avgs = [self._acc_avg, self._ce_avg]
+    self.avgs = []
 
     # ds
     self.w_ds = train_w_ds
     self.arch_ds = train_arch_ds
   
-  def _step_forward(self, inputs, y, mode='w'):
+  def _step_forward(self, img,
+                    img_meta,
+                    gt_bboxes,
+                    gt_bboxes_ignore,
+                    gt_labels,
+                    gt_masks=None,
+                    proposals=None, 
+                    mode='w'):
     """Perform one forward step.
 
     Take inputs, return loss.
     Modify some attributes.
     """
-    self.cur_batch_target = y
-    self.cur_batch_output, loss = self.mod(x=inputs, y=y, mode=mode)
+    loss = self.mod(img,
+                    img_meta,
+                    gt_bboxes,
+                    gt_bboxes_ignore,
+                    gt_labels,
+                    gt_masks=gt_masks,
+                    proposals=proposals, 
+                    mode=mode)
     self.batch_size = inputs.size()[0]
-    if isinstance(loss, (list, tuple)):
-      self.cur_batch_loss = loss[0]
-      self.cur_batch_ce = loss[1]
-    if len(self.gpus) > 1:
-      self.cur_batch_loss = self.cur_batch_loss.mean()
-      self.cur_batch_ce = self.cur_batch_ce.mean()
+    
+
+
+    print(loss)
+
+
+
+
+    self.cur_batch_loss = sum(loss.values())
     return self.cur_batch_loss
 
   def search(self, **kwargs):
     """Override this method if you need a different
     search procedure.
-
-    Parameters
-    ----------
-    epoch : int
-      number of epochs, default is 100
-    start_w_epoch : int
-      train w for start_w_epoch epochs before training
-      architecture parameters, default is 5
-    log_frequence : int
-      log every log_frequence batches, defaulit is 50
     """
 
     num_epoch = kwargs.get('epoch', 100)
@@ -106,19 +103,21 @@ class ClassificationSearcher(BaseSearcher):
     for epoch in range(start_w_epoch):
       self.tic = time.time()
       self.logger.info("Start to train w for epoch %d" % epoch)
-      for step, (input, target) in enumerate(self.w_ds):
-        self.step_w(input, target)
+      for step, inputs in enumerate(self.w_ds):
+        print(inputs)
+        input('jsda;')
+        self.step_w(**inputs)
         self.batch_end_callback(epoch, step)
 
     for epoch in range(num_epoch):
       self.tic = time.time()
       self.logger.info("Start to train arch for epoch %d" % (epoch+start_w_epoch))
-      for step, (input, target) in enumerate(self.arch_ds):
-        self.step_arch(input, target)
+      for step, inputs in enumerate(self.arch_ds):
+        self.step_arch(**inputs)
         self.batch_end_callback(epoch+start_w_epoch, step)
         
       self.tic = time.time()
       self.logger.info("Start to train w for epoch %d" % (epoch+start_w_epoch))
-      for step, (input, target) in enumerate(self.w_ds):
-        self.step_w(input, target)
+      for step, inputs in enumerate(self.w_ds):
+        self.step_w(**inputs)
         self.batch_end_callback(epoch+start_w_epoch, step)  

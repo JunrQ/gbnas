@@ -2,6 +2,7 @@ import torch
 import torch.optim as optim
 from torch.nn.parallel import DataParallel
 import logging
+import time
 
 from ..models.base_model import BaseModel
 from ..utils import CosineDecayLR, AvgrageMeter
@@ -68,8 +69,10 @@ class BaseSearcher(object):
     """
     raise NotImplementedError()
 
-  def step_w(self, inputs, target):
+  def step_w(self, *inputs, **kwargs):
     """Perform one step of $w$ training.
+
+    TODO(ZhouJ) support kwargs
 
     Parameters
     ----------
@@ -79,17 +82,25 @@ class BaseSearcher(object):
       calculating loss
     """
     self.mode = 'w'
+    args = []
+    kwargs_ = {}
     if self.cuda:
-      inputs = inputs.cuda(device=self.gpus[0])
-      target = target.cuda(device=self.gpus[0])
+      for input_ in inputs:
+        if isinstance(input_, torch.Tensor):
+          input_ = input_.cuda(device=self.gpus[0])
+        args.append(input_)
+      for k, v in kwargs.items():
+        if isinstance(v, torch.Tensor):
+          v = v.cuda(device=self.gpus[0])
+        kwargs_[k] = v
     self.w_opt.zero_grad()
-    _, loss = self._step_forward(inputs, y=target, mode='w')
+    loss = self._step_forward(*args, **kwargs_, mode='w')
     loss.backward()
     self.w_opt.step()
     if self.w_lr_scheduler:
       self.w_lr_scheduler.step()
 
-  def step_arch(self, inputs, target):
+  def step_arch(self, *inputs, **kwargs):
     """Perform one step of arch param training.
 
     Parameters
@@ -100,11 +111,19 @@ class BaseSearcher(object):
       calculating loss
     """
     self.mode = 'a'
+    args = []
+    kwargs_ = {}
     if self.cuda:
-      inputs = inputs.cuda(device=self.gpus[0])
-      target = target.cuda(device=self.gpus[0])
+      for input_ in inputs:
+        if isinstance(input_, torch.Tensor):
+          input_ = input_.cuda(device=self.gpus[0])
+        args.append(input_)
+      for k, v in kwargs.items():
+        if isinstance(v, torch.Tensor):
+          v = v.cuda(device=self.gpus[0])
+        kwargs_[k] = v
     self.a_opt.zero_grad()
-    _, loss = self._step_forward(inputs, y=target, mode='a')
+    loss = self._step_forward(*args, **kwargs_, mode='a')
     loss.backward()
     self.a_opt.step()
     if self.arch_lr_scheduler:
@@ -122,7 +141,19 @@ class BaseSearcher(object):
         f.write(s + '\n')
     return res
   
-  def batch_end_callback(self, epoch, batch, log=False):
+  def log_info(self, epoch, batch, speed=None):
+    msg = "Epoch[%d] Batch[%d]" % (epoch, batch)
+    if speed is not None:
+      msg += ' Speed: %.6f samples/sec' % speed
+    msg += ' %s' % self._loss_avg
+    self._loss_avg.reset()
+    for a in self.avgs:
+      msg += " %s" % a
+    self.logger.info(msg)
+    map(lambda avg: avg.reset(), self.avgs)
+    return msg
+  
+  def batch_end_callback(self, epoch, batch):
     """Callback.
 
     Parameters
@@ -132,11 +163,17 @@ class BaseSearcher(object):
     log : bool
       whether do logging
     """
-    raise NotImplementedError()
-  
-  def log_info(self):
-    raise NotImplementedError()
-  
+    for avg in self.avgs:
+      value = avg.cal(self)
+      avg.update(value)
+    self._loss_avg.update(self.cur_batch_loss)
+    
+    if (batch > 0) and (batch % self.log_frequence == 0):
+      self.toc = time.time()
+      speed = 1.0 * (self.batch_size * self.log_frequence) / (self.toc - self.tic)
+      self.log_info(epoch, batch, speed=speed)
+      self.tic = time.time()
+
   def add_avg(self, avg):
     """Add an avg object.
     """

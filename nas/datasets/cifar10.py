@@ -19,6 +19,8 @@ def  get_cifar10_v1(root='/home/zhouchangqing/nas/',
                     batch_size=128):
   """Get cifar 10 dataset.
 
+  TODO(ZhouJ)
+
   Paramters
   ---------
   root : str

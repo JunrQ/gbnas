@@ -117,8 +117,3 @@ class BaseBlock(nn.Module):
       s = self.speed
     l = torch.sum(torch.mul(weight, s))
     return l
-    
-
-
-
-

@@ -12,7 +12,8 @@ class DetectionHead(BaseHead):
   Two stage.
   """
 
-  def __init__(self, cfg):
+  def __init__(self, cfg, train_cfg,
+               test_cfg):
     """Get a head, e.g. RPN
     See mmdetection for details.
 
@@ -46,6 +47,9 @@ class DetectionHead(BaseHead):
       self.mask_roi_extractor = build_roi_extractor(
                             cfg['mask_roi_extractor'])
       self.mask_head = build_head(cfg['mask_head'])
+    
+    self.train_cfg = train_cfg
+    self.test_cfg = test_cfg
   
   @property
   def with_rpn(self):
@@ -138,4 +142,4 @@ class DetectionHead(BaseHead):
                                       pos_labels)
       losses.update(loss_mask)
 
-    return (cls_score, bbox_pred), losses    
+    return losses
