@@ -9,8 +9,7 @@ class ClassificationHead(BaseHead):
 
   def __init__(self, in_channels,
                feature_dim,
-               num_classes,
-               device='cuda'):
+               num_classes):
 
     super(ClassificationHead, self).__init__()
 
@@ -18,7 +17,7 @@ class ClassificationHead(BaseHead):
     self.classifier = nn.Sequential(nn.BatchNorm1d(in_channels),
                                     nn.Linear(in_channels, feature_dim),
                                     nn.Linear(feature_dim, num_classes))
-    self._ce = nn.CrossEntropyLoss().to(device)
+    self._ce = nn.CrossEntropyLoss()
   
   def forward(self, x):
     self.batch_size = x.size()[0]

@@ -16,7 +16,6 @@ class BaseBlock(nn.Module):
                out_channels,
                name,
                stride=1,
-               device='cuda',
                **kwargs):
     """
     Parameters
@@ -34,7 +33,6 @@ class BaseBlock(nn.Module):
     self._mod_params = None
     self._arch_params = None
     self.name = name
-    self.device = device
     self.stride = stride
   
   def init_arch_params(self, init_value=1.0):
@@ -43,7 +41,7 @@ class BaseBlock(nn.Module):
     Register is important for multi-gpus training.
     """
     self.num_blocks = len(self.blocks)
-    self._arch_params = nn.Parameter(torch.ones((self.num_block, )).to(self.device), 
+    self._arch_params = nn.Parameter(torch.ones((self.num_block, )), 
                          requires_grad=True)
     nn.init.constant_(self._arch_params, init_value)
   

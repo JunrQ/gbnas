@@ -64,6 +64,20 @@ class ClassificationSearcher(BaseSearcher):
     # ds
     self.w_ds = train_w_ds
     self.arch_ds = train_arch_ds
+  
+  def _step_forward(self, inputs, y, mode='w'):
+    """Perform one forward step.
+    """
+    self.cur_batch_target = y
+    self.cur_batch_output, loss = self.mod(x=inputs, y=y, mode=mode)
+    self.batch_size = inputs.size()[0]
+    if isinstance(loss, (list, tuple)):
+      self.cur_batch_loss = loss[0]
+      self.cur_batch_ce = loss[1]
+    if len(self.gpus) > 1:
+      self.cur_batch_loss = self.cur_batch_loss.mean()
+      self.cur_batch_ce = self.cur_batch_ce.mean()
+    return self.cur_batch_output, self.cur_batch_loss
 
   def log_info(self, epoch, batch, speed=None):
     msg = "Epoch[%d] Batch[%d]" % (epoch, batch)

@@ -56,10 +56,9 @@ class BaseSearcher(object):
     self.gpus = gpus
     self.cuda = (len(gpus) > 0)
     if self.cuda:
-      if len(gpus) > 1:
-        self.mod = DataParallel(self.mod, gpus)
-      else:
-        self.mod = self.mod.cuda(device=self.gpus[0])
+      self.mod = self.mod.cuda(device=self.gpus[0])
+    if len(gpus) > 1:
+      self.mod = DataParallel(self.mod, gpus)
 
     # Log info
     self.logger = logger
@@ -110,20 +109,6 @@ class BaseSearcher(object):
     self.a_opt.step()
     if self.arch_lr_scheduler:
       self.arch_lr_scheduler.step()
-
-  def _step_forward(self, inputs, y, mode='w'):
-    """Perform one forward step.
-    """
-    self.cur_batch_target = y
-    self.cur_batch_output, loss = self.mod(x=inputs, y=y, mode=mode)
-    self.batch_size = inputs.size()[0]
-    if isinstance(loss, (list, tuple)):
-      self.cur_batch_loss = loss[0]
-      self.cur_batch_ce = loss[1]
-    if len(self.gpus) > 1:
-      self.cur_batch_loss = self.cur_batch_loss.mean()
-      self.cur_batch_ce = self.cur_batch_ce.mean()
-    return self.cur_batch_output, self.cur_batch_loss
 
   def save_arch_params(self, save_path):
     """Save architecture params.
