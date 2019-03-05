@@ -117,25 +117,15 @@ class ClassificationSearcher(BaseSearcher):
         self.step_w(input, target)
         self.batch_end_callback(epoch, step)
 
-        print(self.arch_params[0])
-        print('grad', self.arch_params[0].grad)
-
     for epoch in range(num_epoch):
       self.tic = time.time()
       self.logger.info("Start to train arch for epoch %d" % (epoch+start_w_epoch))
       for step, (input, target) in enumerate(self.arch_ds):
         self.step_arch(input, target)
         self.batch_end_callback(epoch+start_w_epoch, step)
-
-
-
-        print(self.arch_params[0])
-        print('grad', self.arch_params[0].grad)
-
         
       self.tic = time.time()
       self.logger.info("Start to train w for epoch %d" % (epoch+start_w_epoch))
       for step, (input, target) in enumerate(self.w_ds):
         self.step_w(input, target)
         self.batch_end_callback(epoch+start_w_epoch, step)  
-

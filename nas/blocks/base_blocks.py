@@ -16,7 +16,7 @@ class BaseBlock(nn.Module):
                out_channels,
                name,
                stride=1,
-               devide='cuda',
+               device='cuda',
                **kwargs):
     """
     Parameters
@@ -33,9 +33,8 @@ class BaseBlock(nn.Module):
     self.out_channels = out_channels
     self._mod_params = None
     self._arch_params = None
-    self.arch_param_name = name + '_arch_param'
     self.name = name
-    self.devide = devide
+    self.device = device
     self.stride = stride
   
   def init_arch_params(self, init_value=1.0):
@@ -44,7 +43,7 @@ class BaseBlock(nn.Module):
     Register is important for multi-gpus training.
     """
     self.num_blocks = len(self.blocks)
-    self._arch_params = nn.Parameter(torch.ones((self.num_block, )).to(self.devide), 
+    self._arch_params = nn.Parameter(torch.ones((self.num_block, )).to(self.device), 
                          requires_grad=True)
     nn.init.constant_(self._arch_params, init_value)
   
@@ -66,7 +65,7 @@ class BaseBlock(nn.Module):
     if self._mod_params is None:
       self._mod_params = []
       for n, p in self.named_parameters():
-        if self.arch_param_name not in n:
+        if '_arch_params' not in n:
           self._mod_params.append(p)
     return self._mod_params
 
@@ -110,8 +109,11 @@ class BaseBlock(nn.Module):
     """
     assert hasattr(self, 'speed'), 'Make sure you run speed_test before'
     if isinstance(self.speed, list):
-      self.speed = torch.tensor(self.speed)
-    s = self.speed.repeat(batch_size, 1)
+      self.speed = torch.tensor(self.speed).to(self.device)
+    if batch_size > 1:
+      s = self.speed.repeat(batch_size, 1)
+    else:
+      s = self.speed
     l = torch.sum(torch.mul(weight, s))
     return l
     

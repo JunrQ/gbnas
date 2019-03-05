@@ -16,6 +16,8 @@ class SampleBlock(BaseBlock):
   def __init__(self,
                **kwargs):
     super(SampleBlock, self).__init__(**kwargs)
+    # self.reward_baseline = 0.0
+    # self.state_count = 0
   
   # Override
   def prob(self, batch_size):
@@ -33,7 +35,12 @@ class SampleBlock(BaseBlock):
     This loss need not to be differential because
     of REINFORCE.
     """
-    return self.speed[idx]
+    l = self.speed[idx] #  - self.reward_baseline
+    # self.state_count += 1
+    # self.reward_baseline = (self.reward_baseline / 
+    #                         self.state_count * (self.state_count - 1) -
+    #                         self.speed[idx] / self.state_count)
+    return l
   
   def forward(self, x):
     """
@@ -42,6 +49,8 @@ class SampleBlock(BaseBlock):
     batch_size = x.size()[0]
     weight = self.prob(batch_size=1)
 
+    self.latency_loss = super(SampleBlock, self).speed_loss(weight, 1)
+    # sample
     m = torch.distributions.categorical.Categorical(weight)
     action = m.sample()
     choosen_idxs = scalar2int(action)
@@ -53,4 +62,3 @@ class SampleBlock(BaseBlock):
     # reward is minus loss
     rf_loss = p * self.speed_loss(choosen_idxs)
     return output, rf_loss
-
