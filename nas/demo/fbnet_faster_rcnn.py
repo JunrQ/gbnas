@@ -162,7 +162,8 @@ coco_dataset = build_dataloader(coco_dataset, imgs_per_gpu=config.imgs_per_gpu,
 
 model = FBNetCustomFasterRCNN(cfg=mmcv_config(model_cfg), 
                 train_cfg=mmcv_config(train_cfg), 
-                test_cfg=mmcv_config(test_cfg))
+                test_cfg=mmcv_config(test_cfg),
+                channels=model_cfg['neck']['in_channels'])
 model.speed_test(torch.randn((1, 3, 224, 224)), verbose=False,
                  device='cuda:' + args.gpus[0])
 

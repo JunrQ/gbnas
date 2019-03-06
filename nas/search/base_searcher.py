@@ -79,15 +79,6 @@ class BaseSearcher(object):
 
   def step_w(self, *inputs, **kwargs):
     """Perform one step of $w$ training.
-
-    TODO(ZhouJ) support kwargs
-
-    Parameters
-    ----------
-    inputs : list or tuple of four elemets
-      e.g. (x, None, None, None)
-    targets : 
-      calculating loss
     """
     self.mode = 'w'
     self.w_opt.zero_grad()
@@ -99,13 +90,6 @@ class BaseSearcher(object):
 
   def step_arch(self, *inputs, **kwargs):
     """Perform one step of arch param training.
-
-    Parameters
-    ----------
-    inputs : list or tuple of four elemets
-      e.g. (x, None, None, None)
-    targets : 
-      calculating loss
     """
     self.mode = 'a'
     self.a_opt.zero_grad()

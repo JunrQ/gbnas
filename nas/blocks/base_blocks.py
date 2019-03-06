@@ -52,11 +52,11 @@ class BaseBlock(nn.Module):
     weight = nn.functional.gumbel_softmax(t,
                                 temperature)
     return weight
-  
+
   @property
   def arch_params(self):
     return self._arch_params
-  
+
   @property
   def model_params(self):
     # TODO(ZhouJ) arch_params is type tensor, but model_params is list,
