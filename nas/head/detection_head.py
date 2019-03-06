@@ -95,9 +95,9 @@ class DetectionHead(BaseHead):
     # RPN forward and loss
     if self.with_rpn:
       rpn_outs = self.rpn_head(x)
+
       rpn_loss_inputs = rpn_outs + (gt_bboxes, img_meta,
                                     self.train_cfg['rpn'])
-
       rpn_losses = self.rpn_head.loss(*rpn_loss_inputs)
       losses.update(rpn_losses)
 

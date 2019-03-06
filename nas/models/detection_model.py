@@ -28,7 +28,7 @@ class DetectionModel(BaseModel):
     """Forward
 
     NOTE Inputs should be consistent with
-    your dataset.
+    your dataset. 
 
     Parameters
     ----------
