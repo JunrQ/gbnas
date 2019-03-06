@@ -87,6 +87,7 @@ class DetectionSearcher(BaseSearcher):
       self.tic = time.time()
       self.logger.info("Start to train w for epoch %d" % epoch)
       for step, inputs in enumerate(self.w_ds):
+        # TODO(ZhouJ) Assume dataset return a dict
         self.step_w(**inputs)
         self.batch_end_callback(epoch, step)
 

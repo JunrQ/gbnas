@@ -32,6 +32,9 @@ class ClassificationModel(BaseModel):
     """Calculate loss and return it.
 
     Under most circumstance, you want to override this.
+    
+    Like FBNet, total_loss = ce + alpht * lat_loss ** beta
+    Like proxyless nas, loss = E[ce] + E[regularizer] + E[latency_loss]
     """
     head_loss = super(ClassificationModel, self).head_loss_(x, y)
     if hasattr(self, 'loss_func'):
@@ -41,3 +44,44 @@ class ClassificationModel(BaseModel):
       # default
       self.loss = head_loss + 0.1 * self.blk_loss
     return (self.loss, head_loss)
+
+  def forward(self, x, y, base_input=None, 
+              tbs_input=None, head_input=None,
+              mode='w'):
+    """Forward
+
+    Parameters
+    ----------
+    x : torch.tensor
+      input
+    base_input
+      base extra input
+    tbs_input
+      tbs part extra input
+    head_input
+      head extra input
+    """
+    self.batch_size = x.size()[0]
+
+    # base forward
+    if base_input is None:
+      x = self.base(x)
+    else:
+      x = self.base(x, base_input)
+
+    # tbs forward
+    assert tbs_input is None, 'Not supported for now'
+    for i, b in enumerate(self.tbs_blocks):
+      if i == 0:
+        x, self.blk_loss = b(x)
+      else:
+        x, b_l = b(x)
+        self.blk_loss += b_l
+
+    # head forward
+    if head_input is None:
+      x = self.head(x)
+    else:
+      x = self.head(x, head_input)
+    l = self.loss_(x, y)
+    return x, l
