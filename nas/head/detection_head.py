@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from mmdet.models import build_head, build_roi_extractor
+from mmdet.models import build_head, build_roi_extractor, build_neck
 from mmdet.core import bbox2roi, bbox2result, build_assigner, build_sampler
 
 from .base_head import BaseHead
@@ -35,6 +35,9 @@ class DetectionHead(BaseHead):
 
     super(DetectionHead, self).__init__()
 
+    if 'neck' in cfg:
+      self.neck = build_neck(cfg['neck'])
+
     if 'rpn_head' in cfg:
       self.rpn_head = build_head(cfg['rpn_head'])
     
@@ -63,6 +66,10 @@ class DetectionHead(BaseHead):
   def with_mask(self):
     return hasattr(self, 'mask_head') and self.mask_head is not None
   
+  @property
+  def with_neck(self):
+    return hasattr(self, 'neck') and self.neck is not None
+  
 
   def forward(self, 
               x,
@@ -80,26 +87,31 @@ class DetectionHead(BaseHead):
 
     """
     losses = dict()
+    num_imgs = x[0].size(0)
+  
+    if self.with_neck:
+      x = self.neck(x)
 
     # RPN forward and loss
     if self.with_rpn:
       rpn_outs = self.rpn_head(x)
       rpn_loss_inputs = rpn_outs + (gt_bboxes, img_meta,
-                                    self.train_cfg.rpn)
+                                    self.train_cfg['rpn'])
+
       rpn_losses = self.rpn_head.loss(*rpn_loss_inputs)
       losses.update(rpn_losses)
 
-      proposal_inputs = rpn_outs + (img_meta, self.test_cfg.rpn)
+      proposal_inputs = rpn_outs + (img_meta, self.test_cfg['rpn'])
       proposal_list = self.rpn_head.get_bboxes(*proposal_inputs)
     else:
       proposal_list = proposals
-    
+
     # assign gts and sample proposals
     if self.with_bbox or self.with_mask:
-      bbox_assigner = build_assigner(self.train_cfg.rcnn.assigner)
+      bbox_assigner = build_assigner(self.train_cfg['rcnn']['assigner'])
       bbox_sampler = build_sampler(
-          self.train_cfg.rcnn.sampler, context=self)
-      num_imgs = img.size(0)
+          self.train_cfg['rcnn']['sampler'], context=self)
+      
       sampling_results = []
       for i in range(num_imgs):
         assign_result = bbox_assigner.assign(
@@ -123,6 +135,7 @@ class DetectionHead(BaseHead):
 
       bbox_targets = self.bbox_head.get_target(
           sampling_results, gt_bboxes, gt_labels, self.train_cfg.rcnn)
+
       loss_bbox = self.bbox_head.loss(cls_score, bbox_pred,
                                       *bbox_targets)
       losses.update(loss_bbox)

@@ -48,10 +48,7 @@ class BaseBlock(nn.Module):
   def prob(self, batch_size, temperature=1.0):
     """Calculate prob from architecture parameters.
     """
-    if batch_size > 1:
-      t = self.arch_params.repeat(batch_size, 1)
-    else:
-      t = self.arch_params
+    t = self.arch_params.repeat(batch_size, 1)
     weight = nn.functional.gumbel_softmax(t,
                                 temperature)
     return weight

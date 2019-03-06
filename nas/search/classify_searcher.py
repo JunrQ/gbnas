@@ -71,6 +71,9 @@ class ClassificationSearcher(BaseSearcher):
     Take inputs, return loss.
     Modify some attributes.
     """
+    # TODO(ZhouJ) y is not scatter into specified gpus
+    # which makes y and output/loss may sit in different
+    # gpus, and that, is very bad
     self.cur_batch_target = y
     self.cur_batch_output, loss = self.mod(x=inputs, y=y, mode=mode)
     self.batch_size = inputs.size()[0]

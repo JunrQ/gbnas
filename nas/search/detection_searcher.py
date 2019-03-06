@@ -1,5 +1,6 @@
 import logging
 import time
+from mmdet.apis.train import parse_losses
 
 from .base_searcher import BaseSearcher
 from ..utils import AvgrageMeter
@@ -17,6 +18,8 @@ class DetectionSearcher(BaseSearcher):
                mod_opt_dict,
                arch_opt_dict,
                logger=logging,
+               mmcv_parallel=False,
+               imgs_per_gpu=2,
                **kwargs):
     """
     Parameters
@@ -46,7 +49,8 @@ class DetectionSearcher(BaseSearcher):
     super(DetectionSearcher, self).__init__(
       model=model, mod_opt_dict=mod_opt_dict,
       arch_opt_dict=arch_opt_dict, gpus=gpus, 
-      logger=logger, **kwargs)
+      logger=logger, mmcv_parallel=mmcv_parallel, **kwargs)
+    self.batch_size = imgs_per_gpu * len(gpus)
     
     # Info
     self._loss_avg = AvgrageMeter('loss')
@@ -69,7 +73,7 @@ class DetectionSearcher(BaseSearcher):
     Take inputs, return loss.
     Modify some attributes.
     """
-    loss = self.mod(img,
+    losses = self.mod(img,
                     img_meta,
                     gt_bboxes,
                     gt_bboxes_ignore,
@@ -77,16 +81,9 @@ class DetectionSearcher(BaseSearcher):
                     gt_masks=gt_masks,
                     proposals=proposals, 
                     mode=mode)
-    self.batch_size = inputs.size()[0]
-    
 
-
-    print(loss)
-
-
-
-
-    self.cur_batch_loss = sum(loss.values())
+    loss, log_vars = parse_losses(losses)
+    self.cur_batch_loss = loss # sum(loss.values())
     return self.cur_batch_loss
 
   def search(self, **kwargs):
@@ -104,8 +101,6 @@ class DetectionSearcher(BaseSearcher):
       self.tic = time.time()
       self.logger.info("Start to train w for epoch %d" % epoch)
       for step, inputs in enumerate(self.w_ds):
-        print(inputs)
-        input('jsda;')
         self.step_w(**inputs)
         self.batch_end_callback(epoch, step)
 

@@ -11,7 +11,8 @@ class BaseModel(nn.Module):
 
   def __init__(self, base,
                tbs_blocks,
-               head):
+               head,
+               output_indices=None):
     """
     Parameters
     ----------
@@ -21,8 +22,12 @@ class BaseModel(nn.Module):
 
     head : 
 
+    output_indices : list or None
+      for fpn
+
     """
     super(BaseModel, self).__init__()
+    self.output_indices = output_indices if output_indices else []
 
     self.base = base
     if isinstance(tbs_blocks, list):
@@ -93,6 +98,8 @@ class BaseModel(nn.Module):
     TODO(ZhouJ) Don't know if it's right to avoid 
       memory wast.
     """
+    if verbose:
+      print("Doing speed test")
     self.base.eval()
     if base_input is None:
       x = self.base(x)

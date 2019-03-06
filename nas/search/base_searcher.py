@@ -3,9 +3,11 @@ import torch.optim as optim
 from torch.nn.parallel import DataParallel
 import logging
 import time
+from mmcv.parallel import MMDataParallel
 
 from ..models.base_model import BaseModel
 from ..utils import CosineDecayLR, AvgrageMeter
+
 
 class BaseSearcher(object):
   """Base class for searching network.
@@ -19,7 +21,8 @@ class BaseSearcher(object):
                w_lr_scheduler=CosineDecayLR,
                w_sche_cfg={'T_max':400},
                arch_lr_scheduler=None,
-               arch_sche_cfg=None):
+               arch_sche_cfg=None,
+               mmcv_parallel=False):
     """
     Parameters
     ----------
@@ -57,9 +60,14 @@ class BaseSearcher(object):
     self.gpus = gpus
     self.cuda = (len(gpus) > 0)
     if self.cuda:
-      self.mod = self.mod.cuda(device=self.gpus[0])
-    if len(gpus) > 1:
-      self.mod = DataParallel(self.mod, gpus)
+      # TODO(ZhouJ) If not call to(device), DataParallel will
+      # failed - `Broadcast function not implemented for CPU tensors`
+      # It just thinks that model sits on CPU.
+      self.mod.to('cuda:' + str(self.gpus[0]))
+      if mmcv_parallel:
+        self.mod = MMDataParallel(self.mod, gpus) # .cuda()
+      else:
+        self.mod = DataParallel(self.mod, gpus)
 
     # Log info
     self.logger = logger
@@ -82,19 +90,8 @@ class BaseSearcher(object):
       calculating loss
     """
     self.mode = 'w'
-    args = []
-    kwargs_ = {}
-    if self.cuda:
-      for input_ in inputs:
-        if isinstance(input_, torch.Tensor):
-          input_ = input_.cuda(device=self.gpus[0])
-        args.append(input_)
-      for k, v in kwargs.items():
-        if isinstance(v, torch.Tensor):
-          v = v.cuda(device=self.gpus[0])
-        kwargs_[k] = v
     self.w_opt.zero_grad()
-    loss = self._step_forward(*args, **kwargs_, mode='w')
+    loss = self._step_forward(*inputs, **kwargs, mode='w')
     loss.backward()
     self.w_opt.step()
     if self.w_lr_scheduler:
@@ -111,19 +108,8 @@ class BaseSearcher(object):
       calculating loss
     """
     self.mode = 'a'
-    args = []
-    kwargs_ = {}
-    if self.cuda:
-      for input_ in inputs:
-        if isinstance(input_, torch.Tensor):
-          input_ = input_.cuda(device=self.gpus[0])
-        args.append(input_)
-      for k, v in kwargs.items():
-        if isinstance(v, torch.Tensor):
-          v = v.cuda(device=self.gpus[0])
-        kwargs_[k] = v
     self.a_opt.zero_grad()
-    loss = self._step_forward(*args, **kwargs_, mode='a')
+    loss = self._step_forward(*inputs, **kwargs, mode='a')
     loss.backward()
     self.a_opt.step()
     if self.arch_lr_scheduler:

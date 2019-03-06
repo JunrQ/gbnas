@@ -26,6 +26,7 @@ class SampleBlock(BaseBlock):
     if batch_size > 1:
       t = self.arch_params.repeat(batch_size, 1)
     else:
+      # TODO(ZhouJ) This is inconsistent with base block
       t = self.arch_params
     weight = nn.functional.softmax(t)
     return weight

@@ -4,6 +4,7 @@ import os
 import torch
 
 from mmcv.parallel import DataContainer
+from mmcv import Config as mmcv_config
 
 from ..utils import _set_file, _logger
 
@@ -13,9 +14,9 @@ model_cfg = dict(
     pretrained='modelzoo://resnet50',
     neck=dict(
         type='FPN',
-        in_channels=[256, 512, 1024, 2048],
+        in_channels=[122, 128, 256, 256],
         out_channels=256,
-        num_outs=5),
+        num_outs=5),    
     rpn_head=dict(
         type='RPNHead',
         in_channels=256,
@@ -118,6 +119,7 @@ class Config(object):
   model_save_path = '/home1/nas/fbnet-pytorch/'
   start_w_epoch = 2
   train_portion = 0.8
+  imgs_per_gpu = 2
 
 lr_scheduler_params = {
   'logger' : _logger,
@@ -132,8 +134,6 @@ config = Config()
 
 parser = argparse.ArgumentParser(description="Train a model with data parallel for base net \
                                 and model parallel for classify net.")
-parser.add_argument('--batch-size', type=int, default=256,
-                    help='training batch size of all devices.')
 parser.add_argument('--epochs', type=int, default=200,
                     help='number of training epochs.')
 parser.add_argument('--log-frequence', type=int, default=400,
@@ -154,16 +154,16 @@ _set_file(args.model_save_path + 'log.log')
 from ..models.fbnet_faster_rcnn import FBNetCustomFasterRCNN
 from ..search.detection_searcher import DetectionSearcher
 from mmdet.datasets import CocoDataset, build_dataloader
-train_dataset = CocoDataset(**data_cfg['train'])
-train_dataset = build_dataloader(train_dataset, imgs_per_gpu=2,
-                    workers_per_gpu=2,
+coco_dataset = CocoDataset(**data_cfg['train'])
+coco_dataset = build_dataloader(coco_dataset, imgs_per_gpu=config.imgs_per_gpu,
+                    workers_per_gpu=1,
                     dist=False,
                     num_gpus=len(args.gpus))
 
-
-model = FBNetCustomFasterRCNN(cfg=model_cfg, 
-                train_cfg=train_cfg, test_cfg=test_cfg)
-model.speed_test(torch.randn((1, 3, 32, 32)), verbose=False,
+model = FBNetCustomFasterRCNN(cfg=mmcv_config(model_cfg), 
+                train_cfg=mmcv_config(train_cfg), 
+                test_cfg=mmcv_config(test_cfg))
+model.speed_test(torch.randn((1, 3, 224, 224)), verbose=False,
                  device='cuda:' + args.gpus[0])
 
 searcher = DetectionSearcher(
@@ -178,9 +178,11 @@ searcher = DetectionSearcher(
                              'weight_decay':config.t_wd},
               logger=_logger,
               gpus=[int(x) for x in args.gpus.split(',')],
-              train_w_ds=train_dataset,
-              train_arch_ds=train_dataset,
-              w_sche_cfg=lr_scheduler_params)
+              train_w_ds=coco_dataset,
+              train_arch_ds=coco_dataset,
+              w_sche_cfg=lr_scheduler_params,
+              mmcv_parallel=True,
+              imgs_per_gpu=config.imgs_per_gpu)
 
 searcher.search(epoch=args.epochs,
                 start_w_epoch=config.start_w_epoch,
