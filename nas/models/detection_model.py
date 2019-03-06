@@ -27,9 +27,12 @@ class DetectionModel(BaseModel):
               mode='w'):
     """Forward
 
+    NOTE Inputs should be consistent with
+    your dataset.
+
     Parameters
     ----------
-    x : torch.tensor
+    img : torch.tensor
       input
     base_input
       base extra input

@@ -156,9 +156,9 @@ from ..search.detection_searcher import DetectionSearcher
 from mmdet.datasets import CocoDataset, build_dataloader
 coco_dataset = CocoDataset(**data_cfg['train'])
 coco_dataset = build_dataloader(coco_dataset, imgs_per_gpu=config.imgs_per_gpu,
-                    workers_per_gpu=1,
+                    workers_per_gpu=config.imgs_per_gpu,
                     dist=False,
-                    num_gpus=len(args.gpus))
+                    num_gpus=len(args.gpus.split(',')))
 
 model = FBNetCustomFasterRCNN(cfg=mmcv_config(model_cfg), 
                 train_cfg=mmcv_config(train_cfg), 

@@ -60,27 +60,13 @@ class DetectionSearcher(BaseSearcher):
     self.w_ds = train_w_ds
     self.arch_ds = train_arch_ds
   
-  def _step_forward(self, img,
-                    img_meta,
-                    gt_bboxes,
-                    gt_bboxes_ignore,
-                    gt_labels,
-                    gt_masks=None,
-                    proposals=None, 
-                    mode='w'):
+  def _step_forward(self, *args, **kwargs):
     """Perform one forward step.
 
     Take inputs, return loss.
     Modify some attributes.
     """
-    losses = self.mod(img,
-                    img_meta,
-                    gt_bboxes,
-                    gt_bboxes_ignore,
-                    gt_labels,
-                    gt_masks=gt_masks,
-                    proposals=proposals, 
-                    mode=mode)
+    losses = self.mod(*args, **kwargs)
 
     loss, log_vars = parse_losses(losses)
     self.cur_batch_loss = loss # sum(loss.values())
