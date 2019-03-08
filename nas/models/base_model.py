@@ -57,8 +57,7 @@ class BaseModel(nn.Module):
                  device='cuda', verbose=True):
     """Measure speed for tbs blocks.
 
-    TODO(ZhouJ) Don't know if it's right to avoid 
-      memory wast.
+    TODO(ZhouJ) How to release the memeory taken???
     """
     if verbose:
       print("Doing speed test")

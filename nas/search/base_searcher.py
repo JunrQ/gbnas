@@ -27,7 +27,7 @@ class BaseSearcher(object):
                init_temperature=1.0,
                decay_temperature_step=0,
                decay_temperature_ratio=0.9,
-               decay_temperature_every_epoch=False,
+               decay_temperature_every_epoch=True,
                save_result_path='./result/',
                save_arch_params_frequence=5000):
     """

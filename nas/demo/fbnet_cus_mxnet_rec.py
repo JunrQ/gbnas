@@ -20,22 +20,22 @@ class Config(object):
   t_lr = 0.01
   t_wd = 5e-4
   t_beta = (0.9, 0.999)
-  model_save_path = '/home1/nas/fbnet-pytorch/'
-  start_w_epoch = 2
-  train_len = 100
+  model_save_path = '/mnt/data3/nas/fbnet-pytorch/100w/'
+  start_w_epoch = 3
+  train_len = 5000 # Number of epoches
   train_portion = 0.8
   valid_len = int(train_len * train_portion)
   init_temperature = 5.0
   decay_temperature_ratio = 0.956
-  decay_temperature_step = 50
-  save_frequence = 50
+  # decay_temperature_step = 50
+  save_frequence = 5000
 
 lr_scheduler_params = {
   'logger' : _logger,
   'T_max' : 400,
   'alpha' : 1e-4,
   'warmup_step' : 100,
-  't_mul' : 1.5,
+  't_mul' : 1.01,
   'lr_mul' : 0.95,
 }
 
@@ -45,7 +45,7 @@ parser = argparse.ArgumentParser(description="Train a model with data parallel f
                                 and model parallel for classify net.")
 parser.add_argument('--batch-size', type=int, default=256,
                     help='training batch size of all devices.')
-parser.add_argument('--epochs', type=int, default=200,
+parser.add_argument('--epochs', type=int, default=2000,
                     help='number of training epochs.')
 parser.add_argument('--log-frequence', type=int, default=400,
                     help='log frequence, default is 400')
@@ -55,12 +55,12 @@ parser.set_defaults(
     # WebA1
     # num_classes          =  2235656,  #967410,  #
     # num_examples         =  5203228,  #60644986,   #
-    # num_classes=967410,  #
-    # num_examples=60644986,  #
+    num_classes=967410,  #
+    num_examples=60644986,  #
     # num_classes          =  105381,  #
     # num_examples         =  5544050,   #
-    num_classes = 81968, # 8w reid
-    num_examples = 3551853, # 8w reid
+    # num_classes = 81968, # 8w reid
+    # num_examples = 3551853, # 8w reid
 
     # num_classes = 2000,
     # num_examples = int(107588 / 2),
@@ -73,7 +73,7 @@ parser.set_defaults(
     illum_trans_prob=0.3,
     hsv_adjust_prob=0.1,
     # train_rec_path       = '/mnt/data3/zhuzhou/image_labels/SrvA1_fn_lb_lmk.rec',
-    # train_rec_path='/mnt/data4/zcq/face/recognition/training/imgs/WebA1/train_WebA1_100w.rec',
+    train_rec_path='/mnt/data4/zcq/face/recognition/training/imgs/WebA1/train_WebA1_100w.rec',
     # train_rec_path='/mnt/data4/yangling/face/recognition/training/imgs/WebA1/train_WebA1_100w.rec', # 245
     # train_rec_path = '/mnt/data1/yangling_2/face/recognition/training/imgs/WebA1/train_WebA1_100w.rec', # 243
     # train_rec_path = '/home/zhouchangqing/face/recognition/training/imgs/WebA1/train_WebA1_100w.rec',
@@ -83,7 +83,7 @@ parser.set_defaults(
     # train_rec_path = '/mnt/data4/zcq/10w/zhuzhou/MsCeleb_SrvA2_clean/MsCeleb_SrvA2_train_clean_shuffle.rec', # 10w
     # train_rec_path = '/home1/data/zhuzhou/MsCeleb_SrvA2_clean/SrvA2_train_clean_shuffle.rec', # 2w 
     
-    train_rec_path = '/home1/data/zhuzhou/MsCeleb_SrvA2_clean/MsCeleb_train_clean_reid.rec', # 8w, reid
+    # train_rec_path = '/home1/data/zhuzhou/MsCeleb_SrvA2_clean/MsCeleb_train_clean_reid.rec', # 8w, reid
     # train_rec_path = '/mnt/data4/zcq/10w/zhuzhou/MsCeleb_SrvA2_clean/MsCeleb_train_clean_reid.rec',
     
     # train_rec_path = '/home1/data/zhuzhou/MsCeleb_SrvA2_clean/SrvA2_train_clean_reid.rec', # 2w, reid
@@ -110,8 +110,8 @@ val_ds = wrapper.get_valid()
 model = FBNetCustom_v1(args.num_classes, alpha=config.alpha, beta=config.beta)
 
 # TODO(ZhouJ) put this into model or searcher
-model.speed_test(torch.randn((1, 3, 32, 32)), verbose=False,
-                 device='cuda:' + args.gpus[0])
+model.speed_test(torch.randn((1, 3, 108, 108)), verbose=True,
+                 device='cuda:' + args.gpus[-1])
 
 searcher = ClassificationSearcher(
               model=model,
@@ -129,7 +129,7 @@ searcher = ClassificationSearcher(
               train_arch_ds=val_ds,
               w_sche_cfg=lr_scheduler_params,
               init_temperature=config.init_temperature,
-              decay_temperature_step=config.decay_temperature_step,
+              # decay_temperature_step=config.decay_temperature_step,
               decay_temperature_ratio=config.decay_temperature_ratio,
               save_arch_params_frequence=config.save_frequence,
               save_result_path=args.model_save_path)
