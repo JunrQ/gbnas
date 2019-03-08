@@ -21,7 +21,7 @@ class WeightedSum(BaseBlock):
                **kwargs):
     super(WeightedSum, self).__init__(**kwargs)
   
-  def forward(self, x, temperature=1.0):
+  def forward(self, x, temperature=1.0, **kwargs):
     """Weighted sum forward.
 
     Parameters

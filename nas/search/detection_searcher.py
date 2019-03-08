@@ -66,6 +66,8 @@ class DetectionSearcher(BaseSearcher):
     Take inputs, return loss.
     Modify some attributes.
     """
+    if self.decay_temperature:
+      kwargs['tbs_input'] = {'temperature' :  self.temperature}
     losses = self.mod(*args, **kwargs)
 
     loss, log_vars = parse_losses(losses)

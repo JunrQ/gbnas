@@ -5,7 +5,7 @@ import torch
 
 from ..models.fbnet import FBNetCustom, FBNetCustom_v1, FBNet
 from ..search.classify_searcher import ClassificationSearcher
-from ..datasets.cifar10 import get_cifar10_v1
+from ..datasets.mxnet_rec import MXIterWrapper
 from ..utils import _set_file, _logger
 
 class Config(object):

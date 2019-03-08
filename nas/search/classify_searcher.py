@@ -75,7 +75,12 @@ class ClassificationSearcher(BaseSearcher):
     # which makes y and output/loss may sit in different
     # gpus, and that, is very bad
     self.cur_batch_target = y
-    self.cur_batch_output, loss = self.mod(x=inputs, y=y, mode=mode)
+    if self.decay_temperature:
+      tbs_input={'temperature' :  self.temperature}
+    else:
+      tbs_input = None
+    self.cur_batch_output, loss = self.mod(x=inputs, y=y, 
+        mode=mode, tbs_input=tbs_input)
     self.batch_size = inputs.size()[0]
     if isinstance(loss, (list, tuple)):
       self.cur_batch_loss = loss[0]

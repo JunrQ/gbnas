@@ -70,12 +70,13 @@ class ClassificationModel(BaseModel):
       x = self.base(x, base_input)
 
     # tbs forward
-    assert tbs_input is None, 'Not supported for now'
+    if tbs_input is None:
+      tbs_input = {}
     for i, b in enumerate(self.tbs_blocks):
       if i == 0:
-        x, self.blk_loss = b(x)
+        x, self.blk_loss = b(x, **tbs_input)
       else:
-        x, b_l = b(x)
+        x, b_l = b(x, **tbs_input)
         self.blk_loss += b_l
 
     # head forward

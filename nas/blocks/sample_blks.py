@@ -45,7 +45,7 @@ class SampleBlock(BaseBlock):
     #                         self.speed[idx] / self.state_count)
     return l
   
-  def forward(self, x):
+  def forward(self, x, **kwargs):
     """
     TODO(ZhouJ) Only support sample one for now.
     """

@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from normal_blks import ChannelShuffle
+from .normal_blks import ChannelShuffle
 from . import BASICUNIT
 
 def conv_bn_relu(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1):
