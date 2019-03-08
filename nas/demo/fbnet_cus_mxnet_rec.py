@@ -3,6 +3,9 @@ import time
 import os
 import torch
 
+from ..datasets._utils import get_train_ds
+from ..datasets.mxnet_rec import MXIterWrapper
+
 from ..models.fbnet import FBNetCustom, FBNetCustom_v1, FBNet
 from ..search.classify_searcher import ClassificationSearcher
 from ..datasets.mxnet_rec import MXIterWrapper
@@ -19,7 +22,9 @@ class Config(object):
   t_beta = (0.9, 0.999)
   model_save_path = '/home1/nas/fbnet-pytorch/'
   start_w_epoch = 2
+  train_len = 100
   train_portion = 0.8
+  valid_len = int(train_len * train_portion)
   init_temperature = 5.0
   decay_temperature_ratio = 0.956
   decay_temperature_step = 50
@@ -46,6 +51,47 @@ parser.add_argument('--log-frequence', type=int, default=400,
                     help='log frequence, default is 400')
 parser.add_argument('--gpus', type=str, default='0',
                     help='gpus, default is 0')
+parser.set_defaults(
+    # WebA1
+    # num_classes          =  2235656,  #967410,  #
+    # num_examples         =  5203228,  #60644986,   #
+    # num_classes=967410,  #
+    # num_examples=60644986,  #
+    # num_classes          =  105381,  #
+    # num_examples         =  5544050,   #
+    num_classes = 81968, # 8w reid
+    num_examples = 3551853, # 8w reid
+
+    # num_classes = 2000,
+    # num_examples = int(107588 / 2),
+    image_shape='3,108,108',
+    patch_idx=0,
+    patch_size=1,
+    data_nthreads=16,
+    force2gray='false',
+    force2color='false',
+    illum_trans_prob=0.3,
+    hsv_adjust_prob=0.1,
+    # train_rec_path       = '/mnt/data3/zhuzhou/image_labels/SrvA1_fn_lb_lmk.rec',
+    # train_rec_path='/mnt/data4/zcq/face/recognition/training/imgs/WebA1/train_WebA1_100w.rec',
+    # train_rec_path='/mnt/data4/yangling/face/recognition/training/imgs/WebA1/train_WebA1_100w.rec', # 245
+    # train_rec_path = '/mnt/data1/yangling_2/face/recognition/training/imgs/WebA1/train_WebA1_100w.rec', # 243
+    # train_rec_path = '/home/zhouchangqing/face/recognition/training/imgs/WebA1/train_WebA1_100w.rec',
+    # train_rec_path = '/home1/data/face_recognition/face/recognition/training/imgs/WebA1/train_WebA1_100w.rec',
+    # train_rec_path       =  '/home1/data/guag/color10W/MsCeleb_SrvA2_fn_lb_lmk_train.rec',
+    # train_rec_path = '/home1/data/zhuzhou/MsCeleb_SrvA2_clean/MsCeleb_SrvA2_train_clean_shuffle.rec', # 10w
+    # train_rec_path = '/mnt/data4/zcq/10w/zhuzhou/MsCeleb_SrvA2_clean/MsCeleb_SrvA2_train_clean_shuffle.rec', # 10w
+    # train_rec_path = '/home1/data/zhuzhou/MsCeleb_SrvA2_clean/SrvA2_train_clean_shuffle.rec', # 2w 
+    
+    train_rec_path = '/home1/data/zhuzhou/MsCeleb_SrvA2_clean/MsCeleb_train_clean_reid.rec', # 8w, reid
+    # train_rec_path = '/mnt/data4/zcq/10w/zhuzhou/MsCeleb_SrvA2_clean/MsCeleb_train_clean_reid.rec',
+    
+    # train_rec_path = '/home1/data/zhuzhou/MsCeleb_SrvA2_clean/SrvA2_train_clean_reid.rec', # 2w, reid
+    # train_rec_path = '/mnt/data4/zcq/10w/zhuzhou/MsCeleb_SrvA2_clean/SrvA2_train_clean_reid.rec',
+
+    # train_rec_path = '/mnt/data4/zcq/10w/zhuzhou/MsCeleb_SrvA2_clean/MsCeleb_clean1_2w_train_2k.rec', # 2k reid
+    isgray=False,
+)
 args = parser.parse_args()
 
 args.model_save_path = '%s/%s/' % \
@@ -56,10 +102,12 @@ if not os.path.exists(args.model_save_path):
   os.makedirs(args.model_save_path)
 _set_file(args.model_save_path + 'log.log')
 
+mx_rec_iter = get_train_ds(args)
+wrapper = MXIterWrapper(mx_rec_iter, train_len=config.train_len, valid_len=config.valid_len)
+train_ds = wrapper.get_train()
+val_ds = wrapper.get_valid()
 
-train_ds, val_ds = get_cifar10_v1(train_portion=config.train_portion,
-                                  batch_size=args.batch_size)
-model = FBNetCustom_v1(10, alpha=config.alpha, beta=config.beta)
+model = FBNetCustom_v1(args.num_classes, alpha=config.alpha, beta=config.beta)
 
 # TODO(ZhouJ) put this into model or searcher
 model.speed_test(torch.randn((1, 3, 32, 32)), verbose=False,

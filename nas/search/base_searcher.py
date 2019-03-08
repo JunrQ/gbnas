@@ -195,6 +195,7 @@ class BaseSearcher(object):
         save_path = "%s/epoch_%d_end_arch_params.txt" % \
                         (self.save_result_path, epoch)
       self.save_arch_params(save_path)
+      self.logger.info("Save architecture paramterse to %s" % save_path)
   
   def add_batch_end_callback(self, func):
     self._batch_end_cb_func.append(func)
