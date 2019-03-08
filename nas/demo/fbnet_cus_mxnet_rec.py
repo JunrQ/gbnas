@@ -20,7 +20,7 @@ class Config(object):
   t_lr = 0.01
   t_wd = 5e-4
   t_beta = (0.9, 0.999)
-  model_save_path = '/mnt/data3/nas/fbnet-pytorch/100w/'
+  model_save_path = '/mnt/data3/zcq/nas/fbnet-pytorch/100w/'
   start_w_epoch = 3
   train_len = 5000 # Number of epoches
   train_portion = 0.8
