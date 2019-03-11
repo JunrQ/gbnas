@@ -50,13 +50,13 @@ class ClassificationSearcher(BaseSearcher):
     
     # Info
     self._acc_avg = AvgrageMeter('acc')
-    self._acc_avg.register_func(lambda obj : 
-            acc_func(getattr(obj, 'cur_batch_output'), 
-                     getattr(obj, 'cur_batch_target'),
-                     getattr(obj, 'batch_size')))
+    # self._acc_avg.register_func(lambda obj : 
+    #         acc_func(getattr(obj, 'cur_batch_output'), 
+    #                  getattr(obj, 'cur_batch_target'),
+    #                  getattr(obj, 'batch_size')))
     self._ce_avg = AvgrageMeter('ce')
-    self._ce_avg.register_func(lambda obj:
-            getattr(obj, 'cur_batch_ce'))
+    # self._ce_avg.register_func(lambda obj:
+    #         getattr(obj, 'cur_batch_ce'))
 
     self._loss_avg = AvgrageMeter('loss')
     self.avgs = [self._acc_avg, self._ce_avg]
@@ -79,15 +79,15 @@ class ClassificationSearcher(BaseSearcher):
       tbs_input={'temperature' :  self.temperature}
     else:
       tbs_input = None
-    self.cur_batch_output, loss = self.mod(x=inputs, y=y, 
+    _outputs = self.mod(x=inputs, y=y, 
         mode=mode, tbs_input=tbs_input)
-    self.batch_size = inputs.size()[0]
-    if isinstance(loss, (list, tuple)):
-      self.cur_batch_loss = loss[0]
-      self.cur_batch_ce = loss[1]
     if len(self.gpus) > 1:
-      self.cur_batch_loss = self.cur_batch_loss.mean()
-      self.cur_batch_ce = self.cur_batch_ce.mean()
+      _outputs = map(lambda x: x.mean(), _outputs)
+    self.cur_batch_loss, _ce, _acc = _outputs
+    self.batch_size = inputs.size()[0]
+
+    self.cur_batch_ce = _ce.detach()
+    self.cur_batch_acc = _acc.detach()
     return self.cur_batch_loss
 
   def search(self, **kwargs):

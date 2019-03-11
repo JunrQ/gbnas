@@ -1,4 +1,4 @@
-
+import torch
 from .base_model import BaseModel
 
 class ClassificationModel(BaseModel):
@@ -43,7 +43,7 @@ class ClassificationModel(BaseModel):
     else:
       # default
       self.loss = head_loss + 0.1 * self.blk_loss
-    return (self.loss, head_loss)
+    return self.loss, head_loss
 
   def forward(self, x, y, base_input=None, 
               tbs_input=None, head_input=None,
@@ -84,5 +84,8 @@ class ClassificationModel(BaseModel):
       x = self.head(x)
     else:
       x = self.head(x, head_input)
-    l = self.loss_(x, y)
-    return x, l
+    l, ce = self.loss_(x, y)
+  
+    pred = torch.argmax(x, dim=1)
+    acc = torch.sum(pred == y).float() / self.batch_size
+    return l, ce, acc

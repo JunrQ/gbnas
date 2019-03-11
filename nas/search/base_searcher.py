@@ -160,8 +160,13 @@ class BaseSearcher(object):
   
   def _update_avg(self, epoch, batch):
     for avg in self.avgs:
-      value = avg.cal(self)
-      avg.update(value)
+      if avg.name == 'acc':
+        avg.update(self.cur_batch_acc)
+      elif avg.name == 'ce':
+        avg.update(self.cur_batch_ce)
+      else:
+        value = avg.cal(self).detach().numpy()
+        avg.update(value)
     self._loss_avg.update(self.cur_batch_loss)
   
   def _test_log(self, epoch, batch):

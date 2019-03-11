@@ -10,7 +10,6 @@ import torch
 import pdb
 
 from .base_blocks import BaseBlock
-from .utils import scalar2int
 
 class WeightedSum(BaseBlock):
   """Sample one or more blocks from
