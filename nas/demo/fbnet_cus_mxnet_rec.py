@@ -20,7 +20,8 @@ class Config(object):
   t_lr = 0.01
   t_wd = 5e-4
   t_beta = (0.9, 0.999)
-  model_save_path = '/mnt/data3/zcq/nas/fbnet-pytorch/100w/'
+  # model_save_path = '/mnt/data3/zcq/nas/fbnet-pytorch/100w/'
+  model_save_path = '/home1/zcq/nas/fbnet-pytorch/100w/'
   start_w_epoch = 3
   train_len = 5000 # Number of epoches
   train_portion = 0.8
@@ -55,12 +56,12 @@ parser.set_defaults(
     # WebA1
     # num_classes          =  2235656,  #967410,  #
     # num_examples         =  5203228,  #60644986,   #
-    num_classes=967410,  #
-    num_examples=60644986,  #
+    # num_classes=967410,  #
+    # num_examples=60644986,  #
     # num_classes          =  105381,  #
     # num_examples         =  5544050,   #
-    # num_classes = 81968, # 8w reid
-    # num_examples = 3551853, # 8w reid
+    num_classes = 81968, # 8w reid
+    num_examples = 3551853, # 8w reid
 
     # num_classes = 2000,
     # num_examples = int(107588 / 2),
@@ -73,7 +74,7 @@ parser.set_defaults(
     illum_trans_prob=0.3,
     hsv_adjust_prob=0.1,
     # train_rec_path       = '/mnt/data3/zhuzhou/image_labels/SrvA1_fn_lb_lmk.rec',
-    train_rec_path='/mnt/data4/zcq/face/recognition/training/imgs/WebA1/train_WebA1_100w.rec',
+    # train_rec_path='/mnt/data4/zcq/face/recognition/training/imgs/WebA1/train_WebA1_100w.rec',
     # train_rec_path='/mnt/data4/yangling/face/recognition/training/imgs/WebA1/train_WebA1_100w.rec', # 245
     # train_rec_path = '/mnt/data1/yangling_2/face/recognition/training/imgs/WebA1/train_WebA1_100w.rec', # 243
     # train_rec_path = '/home/zhouchangqing/face/recognition/training/imgs/WebA1/train_WebA1_100w.rec',
@@ -81,7 +82,7 @@ parser.set_defaults(
     # train_rec_path       =  '/home1/data/guag/color10W/MsCeleb_SrvA2_fn_lb_lmk_train.rec',
     # train_rec_path = '/home1/data/zhuzhou/MsCeleb_SrvA2_clean/MsCeleb_SrvA2_train_clean_shuffle.rec', # 10w
     # train_rec_path = '/mnt/data4/zcq/10w/zhuzhou/MsCeleb_SrvA2_clean/MsCeleb_SrvA2_train_clean_shuffle.rec', # 10w
-    # train_rec_path = '/home1/data/zhuzhou/MsCeleb_SrvA2_clean/SrvA2_train_clean_shuffle.rec', # 2w 
+    train_rec_path = '/home1/data/zhuzhou/MsCeleb_SrvA2_clean/SrvA2_train_clean_shuffle.rec', # 2w 
     
     # train_rec_path = '/home1/data/zhuzhou/MsCeleb_SrvA2_clean/MsCeleb_train_clean_reid.rec', # 8w, reid
     # train_rec_path = '/mnt/data4/zcq/10w/zhuzhou/MsCeleb_SrvA2_clean/MsCeleb_train_clean_reid.rec',
@@ -110,7 +111,7 @@ val_ds = wrapper.get_valid()
 model = FBNetCustom_v1(args.num_classes, alpha=config.alpha, beta=config.beta)
 
 # TODO(ZhouJ) put this into model or searcher
-model.speed_test(torch.randn((1, 3, 108, 108)), verbose=True,
+model.speed_test(torch.randn((1, 3, 108, 108)), verbose=False,
                  device='cuda:' + args.gpus[-1])
 
 searcher = ClassificationSearcher(

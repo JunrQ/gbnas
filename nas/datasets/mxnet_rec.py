@@ -5,8 +5,9 @@ import torch
 from .fix_len_iterator import FixLenIter
 
 def mxndarray2thtensor(x):
-  x = x.asnumpy()
-  return torch.tensor(x)
+  res = x.asnumpy()
+  del x
+  return torch.tensor(res)
 
 class MXIterWrapper(object):
   """MXNet ImageRecordIter wrapper.
@@ -45,6 +46,7 @@ class MXIterWrapper(object):
       data = data[0]
     label = next_batch.label
     label = list(map(mxndarray2thtensor, label))
+    # TODO(ZhouJ)
     label = list(map(lambda x: x.to(torch.long), label))
     if len(label) == 1:
       label = label[0]
