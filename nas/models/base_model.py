@@ -61,15 +61,16 @@ class BaseModel(nn.Module):
     """
     if verbose:
       print("Doing speed test")
-    self.base.eval()
-    if base_input is None:
-      x = self.base(x)
-    else:
-      x = self.base(x, base_input)
-    
-    for blk in self.tbs_blocks:
-      blk.eval()
-      x = blk.speed_test(x, device=device, verbose=verbose)
+    with torch.autograd.no_grad(): # TODO seems don't work
+      self.base.eval()
+      if base_input is None:
+        x = self.base(x)
+      else:
+        x = self.base(x, base_input)
+      
+      for blk in self.tbs_blocks:
+        blk.eval()
+        x = blk.speed_test(x, device=device, verbose=verbose)
     
   def loss_(self, x, y, mode=None):
     """Calculate loss and return it.

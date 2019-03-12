@@ -5,6 +5,7 @@ import torch
 
 from ..layers import BASICUNIT
 from .utils import measure_speed
+from ..utils import weights_init
 
 class BaseBlock(nn.Module):
   """Base class for TBS(to be search) blocks.
@@ -16,6 +17,7 @@ class BaseBlock(nn.Module):
                out_channels,
                name,
                stride=1,
+               init_func=weights_init,
                **kwargs):
     """
     Parameters
@@ -34,6 +36,7 @@ class BaseBlock(nn.Module):
     self._arch_params = None
     self.name = name
     self.stride = stride
+    self.init_func = init_func
   
   def init_arch_params(self, init_value=1.0):
     """Initilize architecture parameters and register
@@ -80,6 +83,7 @@ class BaseBlock(nn.Module):
     self.blocks = []
     for blk in config:
       t_blk = BASICUNIT[blk[0]](**blk[1])
+      t_blk.apply(self.init_func)
       self.blocks.append(t_blk)
     self.blocks = nn.ModuleList(self.blocks)
     self.num_block = len(self.blocks)
@@ -88,7 +92,7 @@ class BaseBlock(nn.Module):
                  verbose=True):
     """Speed test.
 
-    TODO(ZhouJ) output is the last blk's output
+    TODO(ZhouJ) Realease memory taken
     """
     self.speed = []
     msg = ''
