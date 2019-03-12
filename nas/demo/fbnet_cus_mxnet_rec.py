@@ -133,7 +133,8 @@ searcher = ClassificationSearcher(
               # decay_temperature_step=config.decay_temperature_step,
               decay_temperature_ratio=config.decay_temperature_ratio,
               save_arch_params_frequence=config.save_frequence,
-              save_result_path=args.model_save_path)
+              save_result_path=args.model_save_path,
+              decay_temperature_every_epoch=True)
 
 searcher.search(epoch=args.epochs,
                 start_w_epoch=config.start_w_epoch,

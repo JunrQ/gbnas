@@ -80,10 +80,10 @@ class BaseSearcher(object):
     self.logger = logger
     self.temperature = init_temperature
     self.decay_temperature = False
+    self.decay_temperature_ratio = decay_temperature_ratio
     if decay_temperature_step > 0:
       assert not decay_temperature_every_epoch
       self.decay_temperature_step = decay_temperature_step
-      self.decay_temperature_ratio = decay_temperature_ratio
       self.decay_temperature = True
     
     self._batch_end_cb_func = []
@@ -97,6 +97,7 @@ class BaseSearcher(object):
     
     self._epoch_end_cb_func = []
     if decay_temperature_every_epoch:
+      self.decay_temperature = True # not use
       assert decay_temperature_step == 0
       self.add_epoch_end_callback(lambda x: self._update_temp(x))
     self.add_epoch_end_callback(lambda x: self._save_result_cb(x))
@@ -183,7 +184,7 @@ class BaseSearcher(object):
     batch : None or int
       None means epoch callback
     """
-    if (batch is None ) or ((batch > 0) and (batch % self.decay_temperature_step == 0)):
+    if (batch is None) or ((batch > 0) and (batch % self.decay_temperature_step == 0)):
       self.temperature *= self.decay_temperature_ratio
       msg = 'Epoch[%d] ' % epoch
       if not batch is None:
