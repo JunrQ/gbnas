@@ -117,6 +117,7 @@ class ClassificationSearcher(BaseSearcher):
       for step, (input, target) in enumerate(self.w_ds):
         self.step_w(input, target)
         self.batch_end_callback(epoch, step)
+      self.epopch_end_callback(epoch)
 
     for epoch in range(num_epoch):
       self.tic = time.time()
@@ -129,4 +130,5 @@ class ClassificationSearcher(BaseSearcher):
       self.logger.info("Start to train w for epoch %d" % (epoch+start_w_epoch))
       for step, (input, target) in enumerate(self.w_ds):
         self.step_w(input, target)
-        self.batch_end_callback(epoch+start_w_epoch, step)  
+        self.batch_end_callback(epoch+start_w_epoch, step)
+      self.epopch_end_callback(epoch)

@@ -14,7 +14,7 @@ from ..utils import _set_file, _logger
 class Config(object):
   alpha = 0.2
   beta = 0.6
-  w_lr = 0.1
+  w_lr = 0.01
   w_mom = 0.9
   w_wd = 1e-4
   t_lr = 0.01
