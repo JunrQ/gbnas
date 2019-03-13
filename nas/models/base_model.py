@@ -81,7 +81,3 @@ class BaseModel(nn.Module):
     parameters use different losses.
     """
     raise NotImplementedError()
-
-
-
-

@@ -227,7 +227,7 @@ class BaseSearcher(object):
     for func in self._batch_end_cb_func:
       func(epoch, batch)
   
-  def epopch_end_callback(self, epoch):
+  def epoch_end_callback(self, epoch):
     for func in self._epoch_end_cb_func:
       func(epoch)
 
@@ -235,3 +235,46 @@ class BaseSearcher(object):
     """Add an avg object.
     """
     self.avgs.append(avg)
+
+  def search(self, **kwargs):
+    """Override this method if you need a different
+    search procedure.
+
+    Parameters
+    ----------
+    epoch : int
+      number of epochs, default is 100
+    start_w_epoch : int
+      train w for start_w_epoch epochs before training
+      architecture parameters, default is 5
+    log_frequence : int
+      log every log_frequence batches, defaulit is 50
+    """
+
+    num_epoch = kwargs.get('epoch', 100)
+    start_w_epoch = kwargs.get('start_w_epoch', 5)
+    self.log_frequence = kwargs.get('log_frequence', 50)
+
+    assert start_w_epoch >= 1, "Start to train w first"
+
+    for epoch in range(start_w_epoch):
+      self.tic = time.time()
+      self.logger.info("Start to train w for epoch %d" % epoch)
+      for step, (input, target) in enumerate(self.w_ds):
+        self.step_w(input, target)
+        self.batch_end_callback(epoch, step)
+      self.epoch_end_callback(epoch)
+
+    for epoch in range(num_epoch):
+      self.tic = time.time()
+      self.logger.info("Start to train arch for epoch %d" % (epoch+start_w_epoch))
+      for step, (input, target) in enumerate(self.arch_ds):
+        self.step_arch(input, target)
+        self.batch_end_callback(epoch+start_w_epoch, step)
+        
+      self.tic = time.time()
+      self.logger.info("Start to train w for epoch %d" % (epoch+start_w_epoch))
+      for step, (input, target) in enumerate(self.w_ds):
+        self.step_w(input, target)
+        self.batch_end_callback(epoch+start_w_epoch, step)
+      self.epoch_end_callback(epoch+start_w_epoch)

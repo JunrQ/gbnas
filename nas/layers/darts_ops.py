@@ -3,6 +3,11 @@ import torch.nn as nn
 
 from . import BASICUNIT
 
+from torch.nn import AvgPool2d, MaxPool2d
+
+BASICUNIT._register_module(AvgPool2d)
+BASICUNIT._register_module(MaxPool2d)
+
 @BASICUNIT.register_module
 class ReLUConvBN(nn.Module):
   def __init__(self, C_in, C_out, kernel_size, stride, padding, affine=True):

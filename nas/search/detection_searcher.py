@@ -73,35 +73,3 @@ class DetectionSearcher(BaseSearcher):
     loss, log_vars = parse_losses(losses)
     self.cur_batch_loss = loss # sum(loss.values())
     return self.cur_batch_loss
-
-  def search(self, **kwargs):
-    """Override this method if you need a different
-    search procedure.
-    """
-
-    num_epoch = kwargs.get('epoch', 100)
-    start_w_epoch = kwargs.get('start_w_epoch', 5)
-    self.log_frequence = kwargs.get('log_frequence', 50)
-
-    assert start_w_epoch >= 1, "Start to train w first"
-
-    for epoch in range(start_w_epoch):
-      self.tic = time.time()
-      self.logger.info("Start to train w for epoch %d" % epoch)
-      for step, inputs in enumerate(self.w_ds):
-        # TODO(ZhouJ) Assume dataset return a dict
-        self.step_w(**inputs)
-        self.batch_end_callback(epoch, step)
-
-    for epoch in range(num_epoch):
-      self.tic = time.time()
-      self.logger.info("Start to train arch for epoch %d" % (epoch+start_w_epoch))
-      for step, inputs in enumerate(self.arch_ds):
-        self.step_arch(**inputs)
-        self.batch_end_callback(epoch+start_w_epoch, step)
-        
-      self.tic = time.time()
-      self.logger.info("Start to train w for epoch %d" % (epoch+start_w_epoch))
-      for step, inputs in enumerate(self.w_ds):
-        self.step_w(**inputs)
-        self.batch_end_callback(epoch+start_w_epoch, step)  
