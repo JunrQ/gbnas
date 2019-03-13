@@ -35,5 +35,3 @@ class DAGBlock(BaseBlock):
       states.append(s)
 
     return torch.cat(states[-self._multiplier:], dim=1)
-
-

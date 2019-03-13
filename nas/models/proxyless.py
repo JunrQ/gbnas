@@ -15,7 +15,7 @@ class ProxylessNAS(ClassificationModel):
    - only 9 layers
    - only test on cifar10
   """
-  def __init__(self, num_classes):
+  def __init__(self, num_classes, alpha=0.2, beta=0.6):
     """
     Parameters
     ----------
@@ -48,6 +48,7 @@ class ProxylessNAS(ClassificationModel):
     super(ProxylessNAS, self).__init__(base=base,
                                        tbs_blocks=tbs_list,
                                        head=head)
+    # self.register_loss_func(lambda x, y: x + alpha * y.pow(beta))
 
   def loss_(self, x, y, mode='w'):
     """
@@ -73,12 +74,10 @@ class ProxylessNAS(ClassificationModel):
       mode = 'w'
     head_loss = super(ClassificationModel, self).head_loss_(x, y)
     if mode == 'w':
-      self.latency_loss = self.tbs_blocks[0].latency_loss
-      for i in range(1, len(self.tbs_blocks)):
-        self.latency_loss += self.tbs_blocks[i].latency_loss
-      self.loss = head_loss + 100 * self.latency_loss
+      self.loss = head_loss + 100 * self.blk_loss
     elif mode == 'a':
-      self.loss = 1e5 * self.blk_loss
+      # self.loss = 1e5 * self.blk_loss
+      self.loss = head_loss + 100 * self.blk_loss
     else:
       raise ValueError("Not supported mode: %s provided" % mode)
-    return (self.loss, head_loss)
+    return self.loss, head_loss

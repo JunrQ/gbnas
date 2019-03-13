@@ -78,7 +78,6 @@ class ClassificationModel(BaseModel):
       else:
         x, b_l = b(x, **tbs_input)
         self.blk_loss += b_l
-
     # head forward
     if head_input is None:
       x = self.head(x)

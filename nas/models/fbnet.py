@@ -68,7 +68,7 @@ class FBNetCustom_v1(ClassificationModel):
     in_channels = 64
     base = nn.Conv2d(3, in_channels, 3, 1, padding=1)
     tbs_list = []
-    layer = [2, 2, 2, 2]
+    layer = [3, 3, 3, 3]
     channels = [128, 256, 512, 1024]
     out_channels = channels[0]
 

@@ -9,6 +9,8 @@ from ..datasets.cifar10 import get_cifar10_v1
 from ..utils import _set_file, _logger
 
 class Config(object):
+  alpha = 0.2
+  beta = 0.6
   w_lr = 0.1
   w_mom = 0.9
   w_wd = 1e-4
@@ -16,8 +18,9 @@ class Config(object):
   t_wd = 5e-4
   t_beta = (0.9, 0.999)
   model_save_path = '/home1/nas/fbnet-pytorch/'
-  start_w_epoch = 2
+  start_w_epoch = 10 # sample
   train_portion = 0.8
+  save_frequence = 200
 
 lr_scheduler_params = {
   'logger' : _logger,
@@ -53,10 +56,11 @@ _set_file(args.model_save_path + 'log.log')
 
 train_ds, val_ds = get_cifar10_v1(train_portion=config.train_portion,
                                   batch_size=args.batch_size)
-model = ProxylessNAS(10)
+model = ProxylessNAS(10, alpha=config.alpha, beta=config.beta)
 
 # TODO(ZhouJ) put this into model or searcher
-model.speed_test(torch.randn((1, 3, 32, 32)))
+model.speed_test(torch.randn((1, 3, 32, 32)), device='cuda:' + args.gpus[-1],
+                 verbose=False)
 
 searcher = ClassificationSearcher(
               model=model,
@@ -72,7 +76,10 @@ searcher = ClassificationSearcher(
               gpus=[int(x) for x in args.gpus.split(',')],
               train_w_ds=train_ds,
               train_arch_ds=val_ds,
-              w_sche_cfg=lr_scheduler_params)
+              w_sche_cfg=lr_scheduler_params,
+              no_temperature=True,
+              save_arch_params_frequence=config.save_frequence,
+              save_result_path=args.model_save_path)
 
 searcher.search(epoch=args.epochs,
                 start_w_epoch=config.start_w_epoch,

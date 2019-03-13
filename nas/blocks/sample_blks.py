@@ -59,10 +59,9 @@ class SampleBlock(BaseBlock):
     choosen_idxs = scalar2int(action)
 
     output = self.blocks[choosen_idxs](x)
-    p = m.log_prob(action)
 
     # REINFORCE
     # reward is minus loss
-    # TODO(ZhouJ) This gradient is very small 1e-9
+    p = m.log_prob(action)
     rf_loss = p * self.speed_loss(choosen_idxs)
     return output, rf_loss

@@ -29,7 +29,8 @@ class BaseSearcher(object):
                decay_temperature_ratio=0.9,
                decay_temperature_every_epoch=True,
                save_result_path='./result/',
-               save_arch_params_frequence=5000):
+               save_arch_params_frequence=5000,
+               no_temperature=False):
     """
     Parameters
     ----------
@@ -76,13 +77,17 @@ class BaseSearcher(object):
       else:
         self.mod = DataParallel(self.mod, gpus)
 
+    if no_temperature:
+      decay_temperature_step = -1
+      decay_temperature_every_epoch = False
+
     # Log info
     self.logger = logger
     self.temperature = init_temperature
     self.decay_temperature = False
     self.decay_temperature_ratio = decay_temperature_ratio
     if decay_temperature_step > 0:
-      assert not decay_temperature_every_epoch
+      assert no_temperature or not decay_temperature_every_epoch
       self.decay_temperature_step = decay_temperature_step
       self.decay_temperature = True
     
@@ -98,7 +103,7 @@ class BaseSearcher(object):
     self._epoch_end_cb_func = []
     if decay_temperature_every_epoch:
       self.decay_temperature = True # not use
-      assert decay_temperature_step == 0
+      assert no_temperature or decay_temperature_step == 0
       self.add_epoch_end_callback(lambda x: self._update_temp(x))
     self.add_epoch_end_callback(lambda x: self._save_result_cb(x))
     

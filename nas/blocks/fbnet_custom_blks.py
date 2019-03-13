@@ -89,3 +89,53 @@ class FBNetCustomBlock_v1(WeightedSum):
           cfg.append(['ShuffleV2BasicBlock', kwargs])
       self._default_cfg = cfg
     return self._default_cfg
+
+class FBNetCustomBlock_v2(WeightedSum):
+  """[FBNet](https://arxiv.org/pdf/1812.03443.pdf)
+  """
+  def __init__(self, **kwargs):
+    """FBNet blocks.
+    
+    Parameters
+    ----------
+    in_channels : int
+    out_channels : int
+    name : str
+    device : str or torch.device
+    """
+    super(FBNetCustomBlock_v1, self).__init__(**kwargs)
+    self._default_cfg = None
+
+    self.build_from_config(self.default_config())
+    self.init_arch_params()
+
+  def default_config(self):
+    if self._default_cfg is None:
+      cfg = []
+      for b_idx, g in enumerate([1, 2, 1, 1, 1]):
+        if b_idx < 2:
+          kwargs = {'inplanes' : self.in_channels,
+                    'planes' : self.out_channels,
+                    'stride' : self.stride,
+                    'groups' : g}
+          cfg.append(['ResNetBasicBlock', kwargs])
+        elif b_idx == 2:
+          kwargs = {'inplanes' : self.in_channels,
+                    'planes' : self.out_channels,
+                    'stride' : self.stride,
+                    'reduction' : 8}
+          cfg.append(['SEBasicBlock', kwargs])
+        elif b_idx == 3:
+          kwargs = {'inplanes' : self.in_channels,
+                    'planes' : self.out_channels,
+                    'stride' : self.stride,
+                    'groups' : g}
+          cfg.append(['ResNetBottleneck', kwargs])
+        else:
+          kwargs = {'in_channels' : self.in_channels,
+                    'out_channels' : self.out_channels,
+                    'stride' : self.stride,
+                    'dilation' : 1}
+          cfg.append(['ShuffleV2BasicBlock', kwargs])
+      self._default_cfg = cfg
+    return self._default_cfg
