@@ -9,7 +9,7 @@ from ..datasets.cifar10 import get_cifar10_v1
 from ..utils import _set_file, _logger
 
 class Config(object):
-  alpha = 0.2
+  alpha = 5
   w_lr = 0.1
   w_mom = 0.9
   w_wd = 1e-4

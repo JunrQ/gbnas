@@ -79,7 +79,7 @@ class ClassificationSearcher(BaseSearcher):
       tbs_input={'temperature' :  self.temperature}
     else:
       tbs_input = None
-    _outputs = self.mod(x=inputs, y=y, 
+    _outputs = self.mod(x=inputs, y=y,
         mode=mode, tbs_input=tbs_input)
     if len(self.gpus) > 1:
       _outputs = map(lambda x: x.mean(), _outputs)

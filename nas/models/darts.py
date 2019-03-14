@@ -4,7 +4,6 @@ from .dag_model import DAGModel
 from ..blocks.darts_blks import DartsPaperBlock
 from ..head.classify_head import ClassificationHead
 
-
 class DARTS(DAGModel):
   def __init__(self, num_classes, alpha=0.2):
     """

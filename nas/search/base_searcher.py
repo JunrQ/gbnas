@@ -160,8 +160,10 @@ class BaseSearcher(object):
     self._loss_avg.reset()
     for a in self.avgs:
       msg += " %s" % a
+      a.reset()
     self.logger.info(msg)
-    map(lambda avg: avg.reset(), self.avgs)
+    # map is delayed
+    # map(lambda avg: avg.reset(), self.avgs)
     return msg
   
   def _update_avg(self, epoch, batch):
