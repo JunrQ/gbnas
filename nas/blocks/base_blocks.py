@@ -111,7 +111,7 @@ class BaseBlock(nn.Module):
     """
     assert hasattr(self, 'speed'), 'Make sure you run speed_test before'
     if isinstance(self.speed, list):
-      self.speed = torch.tensor(self.speed).to(weight.device)
+      self.speed = torch.tensor(self.speed, requires_grad=False).to(weight.device)
     if batch_size > 1:
       s = self.speed.repeat(batch_size, 1)
     else:

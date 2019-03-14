@@ -59,6 +59,8 @@ class BaseModel(nn.Module):
 
     TODO(ZhouJ) How to release the memeory taken???
     """
+    self.to(device)
+    x = x.to(device)
     if verbose:
       print("Doing speed test")
     with torch.autograd.no_grad(): # TODO seems don't work
