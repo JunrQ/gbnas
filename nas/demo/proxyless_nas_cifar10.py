@@ -56,7 +56,7 @@ _set_file(args.model_save_path + 'log.log')
 
 train_ds, val_ds = get_cifar10_v1(train_portion=config.train_portion,
                                   batch_size=args.batch_size)
-model = ProxylessNAS(10, alpha=config.alpha, beta=config.beta)
+model = ProxylessNAS(10, alpha=config.alpha)
 
 # TODO(ZhouJ) put this into model or searcher
 model.speed_test(torch.randn((1, 3, 32, 32)), device='cuda:' + args.gpus[-1],
