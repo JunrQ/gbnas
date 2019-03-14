@@ -3,13 +3,14 @@ from .classify_model import ClassificationModel
 
 class DAGModel(ClassificationModel):
   """Base model for classification.
+
+  TODO Architecture paramters should be shared among
+  different layers.
   """
 
   def __init__(self, base,
                tbs_blocks,
                head):
-    """
-    """
     super(DAGModel, self).__init__(base=base,
           tbs_blocks=tbs_blocks, head=head)
 

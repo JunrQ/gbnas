@@ -19,6 +19,9 @@ class Config(object):
   model_save_path = '/home1/nas/fbnet-pytorch/'
   start_w_epoch = 2
   train_portion = 0.8
+  init_temperature = 5.0
+  decay_temperature_ratio = 0.956
+  decay_temperature_step = 50
   save_frequence = 50
 
 lr_scheduler_params = {
@@ -75,9 +78,12 @@ searcher = ClassificationSearcher(
               train_w_ds=train_ds,
               train_arch_ds=val_ds,
               w_sche_cfg=lr_scheduler_params,
-              no_temperature=True,
+              save_result_path=args.model_save_path,
+              init_temperature=config.init_temperature,
+              decay_temperature_step=config.decay_temperature_step,
+              decay_temperature_ratio=config.decay_temperature_ratio,
               save_arch_params_frequence=config.save_frequence,
-              save_result_path=args.model_save_path)
+              decay_temperature_every_epoch=False)
 
 searcher.search(epoch=args.epochs,
                 start_w_epoch=config.start_w_epoch,

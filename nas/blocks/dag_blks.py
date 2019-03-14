@@ -2,7 +2,6 @@
 
 import torch.nn as nn
 import torch
-import torch.nn.functional as F
 
 from .base_blocks import BaseBlock
 from ..layers.darts_ops import FactorizedReduce, ReLUConvBN
@@ -106,7 +105,7 @@ class DAGBlock(BaseBlock):
     # batch_size = s0.size()[0]
     s0 = self.preprocess0(s0)
     s1 = self.preprocess1(s1)
-    weights = F.softmax(self._arch_params, dim=-1)
+    weights = nn.functional.gumbel_softmax(self._arch_params, temperature)
 
     states = [s0, s1]
     offset = 0
