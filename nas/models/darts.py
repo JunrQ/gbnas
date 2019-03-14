@@ -44,7 +44,7 @@ class DARTS(DAGModel):
                                         multiplier=multiplier,
                                         reduction_prev=reduction_prev))
 
-        C_prev_prev, in_channels = out_channels, multiplier*out_channels
+        C_prev_prev, in_channels = in_channels, multiplier*out_channels
         reduction_prev = (stride == 2)
         stride = 1
     

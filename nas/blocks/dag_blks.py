@@ -17,6 +17,15 @@ class MixedOp(nn.Module):
     for cfg in config:
       if 'stride' in cfg[1].keys():
         cfg[1]['stride'] = stride
+      
+      # TODO(ZhouJ) when stride = 2, the first 2 edge 
+      # has stride=2 (that connect to s0 and s1)
+      # but other edge should has stride = 1
+      # But, FactorizedReduce has stride = 2
+      # so we should change it to Identity
+      if stride == 1:
+        if cfg[0] == 'FactorizedReduce':
+          cfg = ['Identity', {}]
       op = BASICUNIT[cfg[0]](**cfg[1])
       if 'pool' in cfg[0].lower():
         op = nn.Sequential(op, nn.BatchNorm2d(C, affine=False))
@@ -38,7 +47,12 @@ class MixedOp(nn.Module):
       self.speed = torch.tensor(self.speed, requires_grad=False)
       self.speed = self.speed.to(x.device)
     self.cost = torch.dot(self.speed, weights)
-    return sum(w * op(x) for w, op in zip(weights, self._ops))
+    # return sum(w * op(x) for w, op in zip(weights, self._ops))
+    res = []
+    for w, op in zip(weights, self._ops):
+      t = op(x)
+      res.append(t)
+    return sum(res)
 
 class DAGBlock(BaseBlock):
   """DAG block, every block is a dag with node
@@ -92,7 +106,7 @@ class DAGBlock(BaseBlock):
     # batch_size = s0.size()[0]
     s0 = self.preprocess0(s0)
     s1 = self.preprocess1(s1)
-    weights = F.softmax(self._arch_params)
+    weights = F.softmax(self._arch_params, dim=-1)
 
     states = [s0, s1]
     offset = 0
@@ -107,7 +121,6 @@ class DAGBlock(BaseBlock):
     return torch.cat(states[-self._multiplier:], dim=1), time_cost
 
   def speed_test(self, s0, s1, device='cuda', times=200, verbose=True):
-    print(self.name, 's0', s0.size(), 's1', s1.size())
     s0 = self.preprocess0(s0)
     s1 = self.preprocess1(s1)
 

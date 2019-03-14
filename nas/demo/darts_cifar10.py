@@ -58,7 +58,7 @@ model = DARTS(10, alpha=config.alpha)
 
 # TODO(ZhouJ) put this into model or searcher
 model.speed_test(torch.randn((1, 3, 32, 32)), verbose=False,
-                 device='cuda:' + args.gpus[0])
+                 device='cuda:' + args.gpus[-1])
 
 searcher = ClassificationSearcher(
               model=model,
