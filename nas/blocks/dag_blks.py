@@ -89,6 +89,7 @@ class DAGBlock(BaseBlock):
         stride = 2 if reduction and j < 2 else 1
         name = self.name + '_node_%d_node_%d' % (j, i+2)
         op = MixedOp(config, C=self.C, stride=stride, name=name)
+        op.apply(self.init_func)
         self._ops.append(op)
     self.num_block = len(config)
   
