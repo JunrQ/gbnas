@@ -12,7 +12,7 @@ from ..datasets.mxnet_rec import MXIterWrapper
 from ..utils import _set_file, _logger
 
 class Config(object):
-  alpha = 0.2
+  alpha = 0.3
   beta = 0.6
   w_lr = 0.01
   w_mom = 0.9
@@ -21,7 +21,7 @@ class Config(object):
   t_wd = 5e-4
   t_beta = (0.9, 0.999)
   # model_save_path = '/mnt/data3/zcq/nas/fbnet-pytorch/100w/'
-  model_save_path = '/home1/zcq/nas/fbnet-pytorch/100w/'
+  model_save_path = '/home1/zcq/nas/fbnet-pytorch/fbnet/8w/'
   start_w_epoch = 3
   train_len = 5000 # Number of epoches
   train_portion = 0.8

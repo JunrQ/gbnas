@@ -17,7 +17,7 @@ class Config(object):
   t_lr = 0.01
   t_wd = 5e-4
   t_beta = (0.9, 0.999)
-  model_save_path = '/home1/nas/fbnet-pytorch/'
+  model_save_path = '/home1/nas/fbnet-pytorch/proxyless/cifar10'
   start_w_epoch = 10 # sample
   train_portion = 0.8
   save_frequence = 200

@@ -20,7 +20,7 @@ class Config(object):
   t_wd = 5e-4
   t_beta = (0.9, 0.999)
   # model_save_path = '/mnt/data3/zcq/nas/fbnet-pytorch/100w/'
-  model_save_path = '/home1/zcq/nas/fbnet-pytorch/100w/'
+  model_save_path = '/home1/zcq/nas/fbnet-pytorch/proxyless/100w/'
   start_w_epoch = 10
   train_len = 3000 # Number of epoches
   train_portion = 0.8
