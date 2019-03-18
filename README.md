@@ -1,6 +1,6 @@
 
 
-# Gradient based NAS
+# Gradient Based NAS
 
 ## Blocks
 

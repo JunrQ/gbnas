@@ -22,7 +22,7 @@ class RLModel(ClassificationModel):
       self.loss = (loss - self.baseline) * log_p
       self.count += 1
       self.baseline = self.baseline * (self.count - 1) / self.count + \
-                      self.loss / self.count
+                      loss.detach() / self.count
     return self.loss, head_loss
 
   def forward(self, x, y, base_input=None, 

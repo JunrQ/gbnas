@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 from .reinforce_model import RLModel
-from ..blocks.proxyless_blks import ProxylessBlock
+from ..blocks.proxyless_blks import ProxylessBlock, ProxylessBlock_v1
 from ..head.classify_head import ClassificationHead
 
 class ProxylessNAS(RLModel):
@@ -69,7 +69,7 @@ class ProxylessNAS_face(RLModel):
 
         name = "layer_%d" % (layer_idx)
         layer_idx += 1
-        tbs_list.append(ProxylessBlock(in_channels=in_channels,
+        tbs_list.append(ProxylessBlock_v1(in_channels=in_channels,
                                       out_channels=out_channels,
                                       stride=stride,
                                       name=name))
