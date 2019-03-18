@@ -18,17 +18,17 @@ class Config(object):
   t_wd = 5e-4
   t_beta = (0.9, 0.999)
   model_save_path = '/home1/nas/fbnet-pytorch/proxyless/cifar10'
-  start_w_epoch = 10 # sample
+  start_w_epoch = 20 # sample
   train_portion = 0.8
   save_frequence = 200
 
 lr_scheduler_params = {
   'logger' : _logger,
-  'T_max' : 400,
+  'T_max' : 90,
   'alpha' : 1e-4,
-  'warmup_step' : 100,
-  't_mul' : 1.5,
-  'lr_mul' : 0.95,
+  'warmup_step' : 10,
+  't_mul' : 1.2,
+  'lr_mul' : 0.9,
 }
 
 config = Config()
@@ -37,7 +37,7 @@ parser = argparse.ArgumentParser(description="Train a model with data parallel f
                                 and model parallel for classify net.")
 parser.add_argument('--batch-size', type=int, default=256,
                     help='training batch size of all devices.')
-parser.add_argument('--epochs', type=int, default=200,
+parser.add_argument('--epochs', type=int, default=2000,
                     help='number of training epochs.')
 parser.add_argument('--log-frequence', type=int, default=400,
                     help='log frequence, default is 400')

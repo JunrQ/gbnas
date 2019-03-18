@@ -13,4 +13,3 @@ class FixLenIter(object):
       raise StopIteration()
   def __iter__(self):
     return self
-    

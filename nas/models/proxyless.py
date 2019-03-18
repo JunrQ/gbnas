@@ -1,11 +1,11 @@
 import torch
 import torch.nn as nn
 
-from .classify_model import ClassificationModel
+from .reinforce_model import RLModel
 from ..blocks.proxyless_blks import ProxylessBlock
 from ..head.classify_head import ClassificationHead
 
-class ProxylessNAS(ClassificationModel):
+class ProxylessNAS(RLModel):
   """ProxylessNAS
   [PROXYLESSNAS](https://arxiv.org/abs/1812.00332)
 
@@ -22,11 +22,11 @@ class ProxylessNAS(ClassificationModel):
     num_classes : int
       number of classes for classification
     """
-    in_channels = 64
+    in_channels = 32
     base = nn.Conv2d(3, in_channels, 3, 1, padding=1)
     tbs_list = []
     layer = [3, 3, 3]
-    channels = [112, 184, 352]
+    channels = [64, 128, 256]
     out_channels = channels[0]
 
     layer_idx = 0
@@ -48,42 +48,8 @@ class ProxylessNAS(ClassificationModel):
     super(ProxylessNAS, self).__init__(base=base,
                                        tbs_blocks=tbs_list,
                                        head=head)
-    # self.register_loss_func(lambda x, y: x + alpha * y.pow(beta))
 
-  def loss_(self, x, y, mode='w'):
-    """
-    Parameters
-    ----------
-    x : tensor
-      input
-    y : tensor
-      target
-    mode : str
-      'w' for training model parameters
-      'a' for training architecture parameters
-      default is 'w'
-    
-    Returns
-    -------
-    total_loss
-    ce
-
-    TODO(ZhouJ) Loss in original paper??
-    """
-    if mode is None:
-      mode = 'w'
-    head_loss = super(ClassificationModel, self).head_loss_(x, y)
-    if mode == 'w':
-      self.loss = head_loss + 100 * self.blk_loss
-    elif mode == 'a':
-      # self.loss = 1e5 * self.blk_loss
-      self.loss = head_loss + 100 * self.blk_loss
-    else:
-      raise ValueError("Not supported mode: %s provided" % mode)
-    return self.loss, head_loss
-
-
-class ProxylessNAS_face(ClassificationModel):
+class ProxylessNAS_face(RLModel):
   """ProxylessNAS
   [PROXYLESSNAS](https://arxiv.org/abs/1812.00332)
   """
@@ -114,4 +80,3 @@ class ProxylessNAS_face(ClassificationModel):
     super(ProxylessNAS_face, self).__init__(base=base,
                                        tbs_blocks=tbs_list,
                                        head=head)
-    self.register_loss_func(lambda x, y: x + alpha * y)

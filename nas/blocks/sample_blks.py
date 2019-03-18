@@ -62,6 +62,8 @@ class SampleBlock(BaseBlock):
 
     # REINFORCE
     # reward is minus loss
+    # p = m.log_prob(action)
+    # rf_loss = p * self.speed_loss(choosen_idxs)
     p = m.log_prob(action)
-    rf_loss = p * self.speed_loss(choosen_idxs)
-    return output, rf_loss
+    rf_loss = self.speed_loss(choosen_idxs)
+    return output, rf_loss, p

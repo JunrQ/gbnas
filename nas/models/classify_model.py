@@ -83,7 +83,7 @@ class ClassificationModel(BaseModel):
       x = self.head(x)
     else:
       x = self.head(x, head_input)
-    l, ce = self.loss_(x, y)
+    l, ce = self.loss_(x, y, mode=mode)
   
     pred = torch.argmax(x, dim=1)
     acc = torch.sum(pred == y).float() / self.batch_size

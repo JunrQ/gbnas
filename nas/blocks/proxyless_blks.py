@@ -27,7 +27,7 @@ class ProxylessBlock(SampleBlock):
     if self._default_cfg is None:
       cfg = []
       for kernel_size in [3, 5, 7]:
-        for expansion in [3, 6]:
+        for expansion in [1, 3]:
           kwargs = {'in_channels' : self.in_channels,
                     'out_channels' : self.out_channels,
                     'kernel_size' : kernel_size,
