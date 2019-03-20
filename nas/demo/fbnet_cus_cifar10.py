@@ -27,10 +27,10 @@ class Config(object):
 
 lr_scheduler_params = {
   'logger' : _logger,
-  'T_max' : 400,
+  'T_max' : 100,
   'alpha' : 1e-4,
   'warmup_step' : 100,
-  't_mul' : 1.5,
+  't_mul' : 1.1,
   'lr_mul' : 0.95,
 }
 
@@ -63,7 +63,7 @@ model = FBNetCustom_v1(10, alpha=config.alpha, beta=config.beta)
 
 # TODO(ZhouJ) put this into model or searcher
 model.speed_test(torch.randn((1, 3, 32, 32)), verbose=False,
-                 device='cuda:' + args.gpus[0])
+                 device='cuda:' + args.gpus[-1])
 
 searcher = ClassificationSearcher(
               model=model,
@@ -84,7 +84,8 @@ searcher = ClassificationSearcher(
               decay_temperature_step=config.decay_temperature_step,
               decay_temperature_ratio=config.decay_temperature_ratio,
               save_arch_params_frequence=config.save_frequence,
-              save_result_path=args.model_save_path)
+              save_result_path=args.model_save_path,
+              decay_temperature_every_epoch=False)
 
 searcher.search(epoch=args.epochs,
                 start_w_epoch=config.start_w_epoch,

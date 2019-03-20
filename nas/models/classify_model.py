@@ -35,6 +35,8 @@ class ClassificationModel(BaseModel):
     
     Like FBNet, total_loss = ce + alpht * lat_loss ** beta
     Like proxyless nas, loss = E[ce] + E[regularizer] + E[latency_loss]
+
+    TODO Return latency loss for logging.
     """
     head_loss = super(ClassificationModel, self).head_loss_(x, y)
     if hasattr(self, 'loss_func'):

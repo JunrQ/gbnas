@@ -9,8 +9,8 @@ class RLModel(ClassificationModel):
     """
     """
     super(RLModel, self).__init__(**kwargs)
-    self.baseline = 0
-    self.count = 0
+    # self.baseline = 0
+    # self.count = 0
   
   def loss_(self, x, y, log_p, mode=None):
     head_loss = super(ClassificationModel, self).head_loss_(x, y)
@@ -19,10 +19,11 @@ class RLModel(ClassificationModel):
       self.loss = head_loss
     elif mode == 'a':
       loss = head_loss + 10 * self.blk_loss
-      self.loss = (loss - self.baseline) * log_p
-      self.count += 1
-      self.baseline = self.baseline * (self.count - 1) / self.count + \
-                      loss.detach() / self.count
+      self.loss = loss * log_p
+      # self.loss = (loss - self.baseline) * log_p
+      # self.count += 1
+      # self.baseline = self.baseline * (self.count - 1) / self.count + \
+      #                 loss.detach() / self.count
     return self.loss, head_loss
 
   def forward(self, x, y, base_input=None, 

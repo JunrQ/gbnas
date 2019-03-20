@@ -21,9 +21,9 @@ class Config(object):
   t_wd = 5e-4
   t_beta = (0.9, 0.999)
   # model_save_path = '/mnt/data3/zcq/nas/fbnet-pytorch/100w/'
-  model_save_path = '/home1/zcq/nas/fbnet-pytorch/fbnet/8w/'
+  model_save_path = '/home1/zcq/nas/fbnet-pytorch/fbnet/2k/v1/'
   start_w_epoch = 3
-  train_len = 5000 # Number of epoches
+  train_len = 500 # Number of epoches
   train_portion = 0.8
   valid_len = int(train_len * train_portion)
   init_temperature = 5.0
@@ -33,9 +33,9 @@ class Config(object):
 
 lr_scheduler_params = {
   'logger' : _logger,
-  'T_max' : 400,
+  'T_max' : 100,
   'alpha' : 1e-4,
-  'warmup_step' : 100,
+  'warmup_step' : 20,
   't_mul' : 1.01,
   'lr_mul' : 0.95,
 }
@@ -60,10 +60,10 @@ parser.set_defaults(
     # num_examples=60644986,  #
     # num_classes          =  105381,  #
     # num_examples         =  5544050,   #
-    num_classes = 81968, # 8w reid
-    num_examples = 3551853, # 8w reid
+    # num_classes = 81968, # 8w reid
+    # num_examples = 3551853, # 8w reid
 
-    # num_classes = 2000,
+    num_classes = 2000,
     # num_examples = int(107588 / 2),
     image_shape='3,108,108',
     patch_idx=0,
@@ -82,7 +82,7 @@ parser.set_defaults(
     # train_rec_path       =  '/home1/data/guag/color10W/MsCeleb_SrvA2_fn_lb_lmk_train.rec',
     # train_rec_path = '/home1/data/zhuzhou/MsCeleb_SrvA2_clean/MsCeleb_SrvA2_train_clean_shuffle.rec', # 10w
     # train_rec_path = '/mnt/data4/zcq/10w/zhuzhou/MsCeleb_SrvA2_clean/MsCeleb_SrvA2_train_clean_shuffle.rec', # 10w
-    train_rec_path = '/home1/data/zhuzhou/MsCeleb_SrvA2_clean/SrvA2_train_clean_shuffle.rec', # 2w 
+    # train_rec_path = '/home1/data/zhuzhou/MsCeleb_SrvA2_clean/SrvA2_train_clean_shuffle.rec', # 2w 
     
     # train_rec_path = '/home1/data/zhuzhou/MsCeleb_SrvA2_clean/MsCeleb_train_clean_reid.rec', # 8w, reid
     # train_rec_path = '/mnt/data4/zcq/10w/zhuzhou/MsCeleb_SrvA2_clean/MsCeleb_train_clean_reid.rec',
@@ -91,6 +91,7 @@ parser.set_defaults(
     # train_rec_path = '/mnt/data4/zcq/10w/zhuzhou/MsCeleb_SrvA2_clean/SrvA2_train_clean_reid.rec',
 
     # train_rec_path = '/mnt/data4/zcq/10w/zhuzhou/MsCeleb_SrvA2_clean/MsCeleb_clean1_2w_train_2k.rec', # 2k reid
+    train_rec_path = '/home1/data/zhuzhou/MsCeleb_SrvA2_clean/MsCeleb_clean1_2w_train_2k.rec',
     isgray=False,
 )
 args = parser.parse_args()
