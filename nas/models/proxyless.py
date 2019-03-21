@@ -55,7 +55,8 @@ class ProxylessNAS_face(RLModel):
   """
   def __init__(self, num_classes, alpha=0.2):
     in_channels = 64
-    base = nn.Conv2d(3, in_channels, 3, 1, padding=1)
+    base = nn.Sequential(nn.Conv2d(3, in_channels, 3, 1, padding=1),
+                         nn.BatchNorm2d(in_channels))
     tbs_list = []
     layer = [3, 3, 3, 3]
     channels = [112, 184, 352, 512]

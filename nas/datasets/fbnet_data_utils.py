@@ -76,7 +76,8 @@ class FBNet_ds(datasets.ImageFolder):
 def get_ds(args, traindir,
            train_portion=0.8,
            random_seed=123,
-           num_cls_used=100):
+           num_cls_used=100,
+           cropped_size=224):
   """Get data set.
 
   Parameters
@@ -94,7 +95,7 @@ def get_ds(args, traindir,
   
   ds_folder = FBNet_ds(root=traindir, 
           transform=transforms.Compose([
-          transforms.RandomResizedCrop(224),
+          transforms.RandomResizedCrop(cropped_size),
           transforms.RandomHorizontalFlip(),
           transforms.ToTensor(),
           normalize,]))

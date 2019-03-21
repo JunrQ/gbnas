@@ -9,7 +9,6 @@ from mmcv.parallel import MMDataParallel
 from ..models.base_model import BaseModel
 from ..utils import CosineDecayLR, AvgrageMeter
 
-
 class BaseSearcher(object):
   """Base class for searching network.
   """
@@ -57,9 +56,11 @@ class BaseSearcher(object):
     opt_type = mod_opt_dict.pop('type')
     mod_opt_dict['params'] = self.mod.model_params
     self.w_opt = getattr(optim, opt_type)(**mod_opt_dict)
+
     opt_type = arch_opt_dict.pop('type')
     arch_opt_dict['params'] = self.mod.arch_params
     self.a_opt = getattr(optim, opt_type)(**arch_opt_dict)
+
     self.w_lr_scheduler =  None if w_lr_scheduler is None \
                            else w_lr_scheduler(self.w_opt, **w_sche_cfg)
     self.arch_lr_scheduler =  None if arch_lr_scheduler is None \
@@ -103,7 +104,7 @@ class BaseSearcher(object):
     self._epoch_end_cb_func = []
     if decay_temperature_every_epoch:
       self.decay_temperature = True # not use
-      assert no_temperature or decay_temperature_step == 0
+      assert no_temperature or decay_temperature_step <= 0
       self.add_epoch_end_callback(lambda x: self._update_temp(x))
     self.add_epoch_end_callback(lambda x: self._save_result_cb(x))
     
@@ -221,10 +222,10 @@ class BaseSearcher(object):
 
     Parameters
     ----------
-    batches : int
-      current batches
-    log : bool
-      whether do logging
+    epoch : int
+      current epoch
+    batch : int 
+      current batch
     """
     for func in self._batch_end_cb_func:
       func(epoch, batch)

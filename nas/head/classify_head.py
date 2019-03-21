@@ -16,6 +16,7 @@ class ClassificationHead(BaseHead):
     self.global_pooling = nn.AdaptiveAvgPool2d(1)
     self.classifier = nn.Sequential(nn.BatchNorm1d(in_channels),
                                     nn.Linear(in_channels, feature_dim),
+                                    # nn.BatchNorm1d(feature_dim),
                                     nn.Linear(feature_dim, num_classes))
     self._ce = nn.CrossEntropyLoss()
   

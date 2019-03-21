@@ -78,5 +78,7 @@ class ProxylessBlock_v1(SampleBlock):
                     'planes' : self.out_channels,
                     'stride' : self.stride}
           cfg.append(['SEBasicBlock', kwargs])
+      if (self.in_channels == self.out_channels) and (self.stride == 1):
+        cfg.append(['Identity', {}])
       self._default_cfg = cfg
     return self._default_cfg

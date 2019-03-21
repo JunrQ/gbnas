@@ -15,14 +15,15 @@ class FBNetCustom(ClassificationModel):
     ----------
     num_classes : int
       number of classes for classification
-    
 
     NOTE
       - first conv : 64
       - output dim : 192
     """
     in_channels = 64
-    base = nn.Conv2d(3, in_channels, 3, 1, padding=1)
+    base = nn.Sequential(
+      nn.Conv2d(3, in_channels, 3, padding=1, bias=False),
+      nn.BatchNorm2d(in_channels))
     tbs_list = []
     layer = [3, 4, 6, 3]
     channels = [122, 184, 352, 1024]
@@ -54,21 +55,12 @@ class FBNetCustom_v1(ClassificationModel):
   """[FBNet](https://arxiv.org/pdf/1812.03443.pdf)
   """
   def __init__(self, num_classes, alpha=0.2, beta=0.6):
-    """
-    Parameters
-    ----------
-    num_classes : int
-      number of classes for classification
-    
-
-    NOTE
-      - first conv : 64
-      - output dim : 192
-    """
     in_channels = 64
-    base = nn.Conv2d(3, in_channels, 3, 1, padding=1)
+    base = nn.Sequential(
+      nn.Conv2d(3, in_channels, 3, padding=1, bias=False),
+      nn.BatchNorm2d(in_channels))
     tbs_list = []
-    layer = [3, 3, 3, 3]
+    layer = [2, 2, 2, 2]
     channels = [128, 256, 512, 1024]
     out_channels = channels[0]
 
@@ -103,14 +95,15 @@ class FBNetCustom_v1_224(ClassificationModel):
     ----------
     num_classes : int
       number of classes for classification
-    
 
     NOTE
       - first conv : 64
       - output dim : 192
     """
     in_channels = 64
-    base = nn.Conv2d(3, in_channels, 3, 2, padding=1)
+    base = nn.Sequential(
+      nn.Conv2d(3, in_channels, 3, padding=1, bias=False),
+      nn.BatchNorm2d(in_channels))
     tbs_list = []
     layer = [2, 2, 2, 2]
     channels = [128, 256, 512, 1024]
@@ -125,9 +118,9 @@ class FBNetCustom_v1_224(ClassificationModel):
         name = "layer_%d" % (layer_idx)
         layer_idx += 1
         tbs_list.append(FBNetCustomBlock_v1(in_channels=in_channels,
-                                         out_channels=out_channels,
-                                         stride=stride,
-                                         name=name))
+                                            out_channels=out_channels,
+                                            stride=stride,
+                                            name=name))
         in_channels = out_channels
         stride = 1
     

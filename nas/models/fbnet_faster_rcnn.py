@@ -11,7 +11,9 @@ class FBNetCustomFasterRCNN(DetectionModel):
   def __init__(self, cfg, train_cfg, test_cfg, channels):
 
     in_channels = 64
-    base = nn.Conv2d(3, in_channels, 3, 2, padding=1)
+    base = nn.Sequential(
+      nn.Conv2d(3, in_channels, 3, padding=1, bias=False),
+      nn.BatchNorm2d(in_channels))
     tbs_list = []
     layer = [2, 2, 2, 2]
     output_indices = (1, 3, 5, 7)

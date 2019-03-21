@@ -3,13 +3,13 @@ import time
 import os
 import torch
 
-from ..models.fbnet import FBNetCustom, FBNetCustom_v1_224, FBNet
+from ..models.fbnet import FBNetCustom_v1, FBNet
 from ..search.classify_searcher import ClassificationSearcher
 from ..utils import _set_file, _logger
 from ..datasets.fbnet_data_utils import get_ds
 
 class Config(object):
-  alpha = 0.2
+  alpha = 2
   beta = 0.6
   w_lr = 0.1
   w_mom = 0.9
@@ -17,14 +17,14 @@ class Config(object):
   t_lr = 0.01
   t_wd = 5e-4
   t_beta = (0.9, 0.999)
-  model_save_path = '/mnt/data3/zcq/nas/fbnet-pytorch/fbnet/imagenet/'
+  model_save_path = '/mnt/data3/zcq/nas/fbnet-pytorch/fbnet/10w/'
   start_w_epoch = 2
   train_portion = 0.8
   init_temperature = 5.0
-  decay_temperature_ratio = 0.956
+  decay_temperature_ratio = 0.9
   decay_temperature_step = 50
   save_frequence = 50
-  num_cls_used = 100
+  num_cls_used = -1 # -1 means no filter
 
 lr_scheduler_params = {
   'logger' : _logger,
@@ -48,7 +48,7 @@ parser.add_argument('--log-frequence', type=int, default=400,
 parser.add_argument('--gpus', type=str, default='0',
                     help='gpus, default is 0')
 parser.add_argument('--num-workers', type=int, default=16,
-                    help='number of subprocesses used to fetch data, default is 4')
+                    help='number of subprocesses used to fetch data, default is 16')
 args = parser.parse_args()
 
 args.model_save_path = '%s/%s/' % \
@@ -60,16 +60,17 @@ if not os.path.exists(args.model_save_path):
 _set_file(args.model_save_path + 'log.log')
 
 
-imagenet_root = '/mnt/data4/zcq/imagenet/train/'
+imagenet_root = '/mnt/data3/zcq/recover_97w/'
 train_queue, val_queue, num_classes = get_ds(args, imagenet_root,
                                 num_cls_used=config.num_cls_used,
-                                train_portion=config.train_portion)
+                                train_portion=config.train_portion,
+                                cropped_size=108)
 
-model = FBNetCustom_v1_224(num_classes,
-                           alpha=config.alpha, beta=config.beta)
+model = FBNetCustom_v1(num_classes,
+                       alpha=config.alpha, beta=config.beta)
 
 # TODO(ZhouJ) put this into model or searcher
-model.speed_test(torch.randn((1, 3, 224, 224)), verbose=False,
+model.speed_test(torch.randn((1, 3, 108, 108)), verbose=False,
                  device='cuda:' + args.gpus[0])
 
 searcher = ClassificationSearcher(

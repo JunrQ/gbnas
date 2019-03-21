@@ -43,6 +43,8 @@ class FBNetCustomBlock(WeightedSum):
                     'planes' : self.out_channels,
                     'stride' : self.stride}
           cfg.append(['SEBasicBlock', kwargs])
+      if (self.in_channels == self.out_channels) and (self.stride == 1):
+        cfg.append(['Identity', {}])
       self._default_cfg = cfg
     return self._default_cfg
 
@@ -87,6 +89,8 @@ class FBNetCustomBlock_v1(WeightedSum):
                     'stride' : self.stride,
                     'dilation' : 1}
           cfg.append(['ShuffleV2BasicBlock', kwargs])
+      if (self.in_channels == self.out_channels) and (self.stride == 1):
+        cfg.append(['Identity', {}])
       self._default_cfg = cfg
     return self._default_cfg
 
@@ -137,5 +141,7 @@ class FBNetCustomBlock_v2(WeightedSum):
                     'stride' : self.stride,
                     'dilation' : 1}
           cfg.append(['ShuffleV2BasicBlock', kwargs])
+      if (self.in_channels == self.out_channels) and (self.stride == 1):
+        cfg.append(['Identity', {}])
       self._default_cfg = cfg
     return self._default_cfg
