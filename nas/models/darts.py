@@ -11,6 +11,7 @@ class DARTS(DAGModel):
       - first conv : 64
       - output dim : 192
     """
+    self.alpha = alpha
     in_channels = 16
     base = nn.Sequential(
       nn.Conv2d(3, in_channels, 3, padding=1, bias=False),
@@ -51,4 +52,8 @@ class DARTS(DAGModel):
     super(DARTS, self).__init__(base=base,
                                 tbs_blocks=tbs_list,
                                 head=head)
-    self.register_loss_func(lambda x, y: x + alpha * y)
+  def loss_(self, x, y, mode=None):
+    head_loss = super(ClassificationModel, self).head_loss_(x, y)
+    self.loss = head_loss + self.alpha * self.blk_loss
+    return self.loss, head_loss
+

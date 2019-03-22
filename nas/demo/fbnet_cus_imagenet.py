@@ -65,8 +65,8 @@ train_queue, val_queue, num_classes = get_ds(args, imagenet_root,
                                 num_cls_used=config.num_cls_used,
                                 train_portion=config.train_portion)
 
-model = FBNetCustom_v1_224(num_classes,
-                           alpha=config.alpha, beta=config.beta)
+model = FBNet(num_classes,
+              alpha=config.alpha, beta=config.beta)
 
 # TODO(ZhouJ) put this into model or searcher
 model.speed_test(torch.randn((1, 3, 224, 224)), verbose=False,

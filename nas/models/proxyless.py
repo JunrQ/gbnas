@@ -22,6 +22,7 @@ class ProxylessNAS(RLModel):
     num_classes : int
       number of classes for classification
     """
+    self.alpha = alpha
     in_channels = 32
     base = nn.Conv2d(3, in_channels, 3, 1, padding=1)
     tbs_list = []
@@ -48,6 +49,10 @@ class ProxylessNAS(RLModel):
     super(ProxylessNAS, self).__init__(base=base,
                                        tbs_blocks=tbs_list,
                                        head=head)
+  def loss_(self, x, y, mode=None):
+    head_loss = super(ClassificationModel, self).head_loss_(x, y)
+    self.loss = head_loss + self.alpha * self.blk_loss
+    return self.loss, head_loss
 
 class ProxylessNAS_face(RLModel):
   """ProxylessNAS
@@ -55,6 +60,7 @@ class ProxylessNAS_face(RLModel):
   """
   def __init__(self, num_classes, alpha=0.2):
     in_channels = 64
+    self.alpha = alpha
     base = nn.Sequential(nn.Conv2d(3, in_channels, 3, 1, padding=1),
                          nn.BatchNorm2d(in_channels))
     tbs_list = []
@@ -81,3 +87,7 @@ class ProxylessNAS_face(RLModel):
     super(ProxylessNAS_face, self).__init__(base=base,
                                        tbs_blocks=tbs_list,
                                        head=head)
+  def loss_(self, x, y, mode=None):
+    head_loss = super(ClassificationModel, self).head_loss_(x, y)
+    self.loss = head_loss + self.alpha * self.blk_loss
+    return self.loss, head_loss

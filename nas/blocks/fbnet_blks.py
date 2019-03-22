@@ -41,8 +41,7 @@ class FBNetPaperBlock(WeightedSum):
                   'groups' : g,
                   'expansion' : e}
         cfg.append(['FBNetBlock', kwargs])
-      
-      # TODO(ZhouJ) Why skip important?
+
       if self.in_channels == self.out_channels and (self.stride == 1):
         cfg.append(['Identity', {}])
 

@@ -20,6 +20,8 @@ class FBNetCustom(ClassificationModel):
       - first conv : 64
       - output dim : 192
     """
+    self.alpha = alpha
+    self.beta = beta
     in_channels = 64
     base = nn.Sequential(
       nn.Conv2d(3, in_channels, 3, padding=1, bias=False),
@@ -49,12 +51,17 @@ class FBNetCustom(ClassificationModel):
                                       tbs_blocks=tbs_list,
                                       head=head)
     
-    self.register_loss_func(lambda x, y: x + alpha * y.pow(beta))
+  def loss_(self, x, y, mode=None):
+    head_loss = super(ClassificationModel, self).head_loss_(x, y)
+    self.loss = head_loss + self.alpha * (self.blk_loss.pow(self.beta))
+    return self.loss, head_loss
 
 class FBNetCustom_v1(ClassificationModel):
   """[FBNet](https://arxiv.org/pdf/1812.03443.pdf)
   """
   def __init__(self, num_classes, alpha=0.2, beta=0.6):
+    self.alpha = alpha
+    self.beta = beta
     in_channels = 64
     base = nn.Sequential(
       nn.Conv2d(3, in_channels, 3, padding=1, bias=False),
@@ -83,8 +90,10 @@ class FBNetCustom_v1(ClassificationModel):
     super(FBNetCustom_v1, self).__init__(base=base,
                                       tbs_blocks=tbs_list,
                                       head=head)
-    
-    self.register_loss_func(lambda x, y: x + alpha * y.pow(beta))
+  def loss_(self, x, y, mode=None):
+    head_loss = super(ClassificationModel, self).head_loss_(x, y)
+    self.loss = head_loss + self.alpha * (self.blk_loss.pow(self.beta))
+    return self.loss, head_loss
 
 class FBNetCustom_v1_224(ClassificationModel):
   """[FBNet](https://arxiv.org/pdf/1812.03443.pdf)
@@ -100,6 +109,8 @@ class FBNetCustom_v1_224(ClassificationModel):
       - first conv : 64
       - output dim : 192
     """
+    self.alpha = alpha
+    self.beta = beta
     in_channels = 64
     base = nn.Sequential(
       nn.Conv2d(3, in_channels, 3, padding=1, bias=False),
@@ -128,25 +139,17 @@ class FBNetCustom_v1_224(ClassificationModel):
     super(FBNetCustom_v1_224, self).__init__(base=base,
                                       tbs_blocks=tbs_list,
                                       head=head)
-    
-    self.register_loss_func(lambda x, y: x + alpha * y.pow(beta))
+  def loss_(self, x, y, mode=None):
+    head_loss = super(ClassificationModel, self).head_loss_(x, y)
+    self.loss = head_loss + self.alpha * (self.blk_loss.pow(self.beta))
+    return self.loss, head_loss
 
 class FBNet(ClassificationModel):
   """[FBNet](https://arxiv.org/pdf/1812.03443.pdf)
   """
   def __init__(self, num_classes, alpha=0.2, beta=0.6):
-    """
-    Parameters
-    ----------
-    num_classes : int
-      number of classes for classification
-    
-
-    NOTE
-      - first conv : 64
-      - output dim : 192
-    """
-    
+    self.alpha = alpha
+    self.beta = beta
     tbs_list = []
     _f = [16, 24, 32, 
           64, 112, 184, 352]
@@ -155,7 +158,7 @@ class FBNet(ClassificationModel):
     _s = [1, 2, 2,
           2, 1, 2, 1]
     in_channels = 16
-    base = nn.Conv2d(3, in_channels, 3, 1, padding=1)
+    base = nn.Conv2d(3, in_channels, 3, 2, padding=1)
     out_channels = channels[0]
 
     layer_idx = 0
@@ -177,5 +180,7 @@ class FBNet(ClassificationModel):
     super(FBNet, self).__init__(base=base,
                                 tbs_blocks=tbs_list,
                                 head=head)
-    
-    self.register_loss_func(lambda x, y: x + alpha * y.pow(beta))
+  def loss_(self, x, y, mode=None):
+    head_loss = super(ClassificationModel, self).head_loss_(x, y)
+    self.loss = head_loss + self.alpha * (self.blk_loss.pow(self.beta))
+    return self.loss, head_loss
